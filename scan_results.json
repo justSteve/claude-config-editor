@@ -1,0 +1,175 @@
+{
+  "_env_vars": {
+    "%USERPROFILE%": "C:\\Users\\steve",
+    "%APPDATA%": "C:\\Users\\steve\\AppData\\Roaming",
+    "%ProgramData%": "C:\\ProgramData"
+  },
+  "Settings Files": {
+    "User Settings": {
+      "path": "C:\\Users\\steve\\.claude\\settings.json",
+      "info": {
+        "exists": true,
+        "size": 78,
+        "size_formatted": "78 B",
+        "modified": "2025-11-01 13:04:13",
+        "type": "file"
+      }
+    },
+    "Project Settings (Shared)": {
+      "path": ".claude\\settings.json",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: '.claude\\\\settings.json'"
+      }
+    },
+    "Project Settings (Local)": {
+      "path": ".claude\\settings.local.json",
+      "info": {
+        "exists": true,
+        "size": 185,
+        "size_formatted": "185 B",
+        "modified": "2025-11-02 14:34:15",
+        "type": "file"
+      }
+    },
+    "Enterprise Managed Settings": {
+      "path": "C:\\ProgramData\\ClaudeCode\\managed-settings.json",
+      "info": {
+        "exists": false,
+        "error": "[WinError 3] The system cannot find the path specified: 'C:\\\\ProgramData\\\\ClaudeCode\\\\managed-settings.json'"
+      }
+    },
+    "Original Claude Code Config": {
+      "path": "C:\\Users\\steve\\.claude.json",
+      "info": {
+        "exists": true,
+        "size": 42338,
+        "size_formatted": "41.35 KB",
+        "modified": "2025-11-02 14:19:02",
+        "type": "file"
+      }
+    }
+  },
+  "Memory Files (CLAUDE.md)": {
+    "User Memory": {
+      "path": "C:\\Users\\steve\\.claude\\CLAUDE.md",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\steve\\\\.claude\\\\CLAUDE.md'"
+      }
+    },
+    "Project Memory": {
+      "path": "CLAUDE.md",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: 'CLAUDE.md'"
+      }
+    },
+    "Enterprise Memory": {
+      "path": "C:\\ProgramData\\ClaudeCode\\CLAUDE.md",
+      "info": {
+        "exists": false,
+        "error": "[WinError 3] The system cannot find the path specified: 'C:\\\\ProgramData\\\\ClaudeCode\\\\CLAUDE.md'"
+      }
+    }
+  },
+  "Subagents": {
+    "User Subagents": {
+      "path": "C:\\Users\\steve\\.claude\\agents",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\steve\\\\.claude\\\\agents'"
+      }
+    },
+    "Project Subagents": {
+      "path": ".claude\\agents",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: '.claude\\\\agents'"
+      }
+    }
+  },
+  "Claude Desktop": {
+    "Config File": {
+      "path": "C:\\Users\\steve\\AppData\\Roaming\\Claude\\claude_desktop_config.json",
+      "info": {
+        "exists": true,
+        "size": 1153,
+        "size_formatted": "1.13 KB",
+        "modified": "2025-10-12 10:53:51",
+        "type": "file"
+      }
+    }
+  },
+  "Slash Commands": {
+    "Project Commands": {
+      "path": ".claude\\commands",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: '.claude\\\\commands'"
+      }
+    },
+    "Personal Commands": {
+      "path": "C:\\Users\\steve\\.claude\\commands",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\steve\\\\.claude\\\\commands'"
+      }
+    }
+  },
+  "MCP Servers": {
+    "User Settings (Local Scope)": {
+      "path": "C:\\Users\\steve\\.claude\\settings.json",
+      "info": {
+        "exists": true,
+        "size": 78,
+        "size_formatted": "78 B",
+        "modified": "2025-11-01 13:04:13",
+        "type": "file"
+      }
+    },
+    "Project Config": {
+      "path": ".mcp.json",
+      "info": {
+        "exists": false,
+        "error": "[WinError 2] The system cannot find the file specified: '.mcp.json'"
+      }
+    },
+    "Claude Desktop MCP Config": {
+      "path": "C:\\Users\\steve\\AppData\\Roaming\\Claude\\claude_desktop_config.json",
+      "info": {
+        "exists": true,
+        "size": 1153,
+        "size_formatted": "1.13 KB",
+        "modified": "2025-10-12 10:53:51",
+        "type": "file"
+      }
+    }
+  },
+  "Logs": {
+    "MCP Logs Directory": {
+      "path": "C:\\Users\\steve\\AppData\\Roaming\\Claude\\Logs",
+      "info": {
+        "exists": true,
+        "size": 8192,
+        "size_formatted": "8.00 KB",
+        "modified": "2025-10-30 11:45:22",
+        "type": "directory",
+        "mcp_log_count": 17,
+        "mcp_logs": [
+          "mcp-server-brave-search.log",
+          "mcp-server-brave-search1.log",
+          "mcp-server-Context7.log",
+          "mcp-server-fetch.log",
+          "mcp-server-fetch1.log",
+          "mcp-server-filesystem.log",
+          "mcp-server-filesystem1.log",
+          "mcp-server-git.log",
+          "mcp-server-git1.log",
+          "mcp-server-github.log",
+          "... and 7 more"
+        ]
+      }
+    }
+  }
+}

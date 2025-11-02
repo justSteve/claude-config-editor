@@ -58,6 +58,40 @@
             align-items: center;
         }
 
+        select {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        select:hover:not(:disabled) {
+            border-color: #4ec9b0;
+            background: #252526;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4ec9b0;
+            box-shadow: 0 0 0 2px rgba(78, 201, 176, 0.2);
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        select option {
+            background: #252526;
+            color: #d4d4d4;
+            padding: 8px;
+        }
+
         .tabs {
             display: flex;
             gap: 5px;
@@ -348,6 +382,12 @@
         </div>
 
         <div class="top-controls">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="color: #858585; font-size: 13px;">Active Config:</label>
+                <select id="config-selector" onchange="switchConfig(this.value)">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
             <button class="success" onclick="saveConfig()" id="save-btn" disabled>💾 Save Changes</button>
             <button onclick="reloadConfig()">🔄 Reload</button>
             <button onclick="createBackup()">📦 Backup</button>
@@ -363,6 +403,7 @@
             <button class="tab active" onclick="switchTab('overview')">📊 Overview</button>
             <button class="tab" onclick="switchTab('projects')">📁 Project History</button>
             <button class="tab" onclick="switchTab('mcp')">🔌 MCP Servers</button>
+            <button class="tab" onclick="switchTab('paths')">🗂️ System Paths</button>
             <button class="tab" onclick="switchTab('raw')">📝 Raw JSON</button>
         </div>
 
@@ -442,6 +483,36 @@
             </div>
         </div>
 
+        <!-- System Paths Tab -->
+        <div id="tab-paths" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2>🔧 Windows Environment Variables</h2>
+                </div>
+                <div id="env-vars-display"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>🗂️ Claude Code & Desktop Paths</h2>
+                    <button onclick="refreshPaths()">🔄 Refresh</button>
+                </div>
+                <div id="system-paths-display"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>📚 Documentation</h2>
+                </div>
+                <div style="padding: 15px; color: #858585; line-height: 1.8;">
+                    <p><strong>Path Scanner Tool:</strong> Run <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">python windows_scan.py</code> for comprehensive path scanning.</p>
+                    <p><strong>Export Results:</strong> Use <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">python windows_scan.py --json</code> to export scan results.</p>
+                    <p><strong>Documentation:</strong> See <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">WINDOWS_SCAN_README.md</code> for complete path documentation.</p>
+                    <p><strong>Path Handling:</strong> See <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">PATH_HANDLING_SUMMARY.md</code> for placeholder vs. resolved path details.</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Raw JSON Tab -->
         <div id="tab-raw" class="tab-content">
             <div class="section">
@@ -461,7 +532,51 @@
         let sortDirection = 'desc';
         let hasChanges = false;
 
-        window.addEventListener('DOMContentLoaded', loadConfig);
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadAvailableConfigs();
+            await loadConfig();
+        });
+
+        async function loadAvailableConfigs() {
+            try {
+                const response = await fetch('/api/configs');
+                const configs = await response.json();
+
+                const selector = document.getElementById('config-selector');
+                selector.innerHTML = '';
+
+                if (configs.length === 0) {
+                    selector.innerHTML = '<option value="">No configs found</option>';
+                    selector.disabled = true;
+                    return;
+                }
+
+                configs.forEach(cfg => {
+                    const option = document.createElement('option');
+                    option.value = cfg.id;
+
+                    // Add icon based on type
+                    const icon = cfg.type === 'code' ? '⚡' : '🖥️';
+                    option.textContent = `${icon} ${cfg.name}`;
+
+                    if (cfg.active) {
+                        option.selected = true;
+                    }
+                    selector.appendChild(option);
+                });
+
+                // Show dropdown if multiple configs, hide if only one
+                selector.disabled = configs.length <= 1;
+
+                // Update message if only one config
+                if (configs.length === 1) {
+                    selector.title = 'Only one config detected. Install both Claude Code and Claude Desktop to switch between them.';
+                }
+            } catch (error) {
+                console.error('Error loading configs:', error);
+                showMessage('Error loading available configs: ' + error.message, 'error');
+            }
+        }
 
         async function loadConfig() {
             try {
@@ -475,6 +590,42 @@
                 renderAllTabs();
             } catch (error) {
                 showMessage('Error loading config: ' + error.message, 'error');
+            }
+        }
+
+        async function switchConfig(configId) {
+            if (!configId) return;
+
+            // Warn if there are unsaved changes
+            if (hasChanges) {
+                if (!confirm('You have unsaved changes. Switch config anyway?')) {
+                    // Revert selector to current config
+                    await loadAvailableConfigs();
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('/api/switch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ config_id: configId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(`Switched to ${result.config}`, 'success');
+                    hasChanges = false;
+                    document.getElementById('save-btn').disabled = true;
+                    await loadConfig();
+                } else {
+                    showMessage(`Error switching config: ${result.error}`, 'error');
+                    await loadAvailableConfigs();
+                }
+            } catch (error) {
+                showMessage('Error switching config: ' + error.message, 'error');
+                await loadAvailableConfigs();
             }
         }
 
@@ -499,6 +650,7 @@
             renderOverview();
             renderProjects();
             renderMcpServers();
+            renderSystemPaths();
             renderRawJson();
         }
 
@@ -640,6 +792,207 @@
         function renderRawJson() {
             const container = document.getElementById('raw-json');
             container.textContent = JSON.stringify(config, null, 2);
+        }
+
+        function renderSystemPaths() {
+            // Render environment variables
+            renderEnvVars();
+
+            // Render path status
+            renderPathStatus();
+        }
+
+        function renderEnvVars() {
+            const container = document.getElementById('env-vars-display');
+            const envVars = getWindowsEnvVars();
+
+            let html = '<div style="padding: 15px;">';
+            html += '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="border-bottom: 2px solid #3e3e42;">';
+            html += '<th style="text-align: left; padding: 12px; color: #4ec9b0;">Placeholder</th>';
+            html += '<th style="text-align: left; padding: 12px; color: #4ec9b0;">Resolved Path</th>';
+            html += '<th style="text-align: left; padding: 12px; color: #4ec9b0;">Description</th>';
+            html += '</tr></thead><tbody>';
+
+            for (const [placeholder, info] of Object.entries(envVars)) {
+                html += '<tr style="border-bottom: 1px solid #3e3e42;">';
+                html += `<td style="padding: 12px; font-family: Monaco, monospace; color: #ce9178;"><code>${escapeHtml(placeholder)}</code></td>`;
+                html += `<td style="padding: 12px; font-family: Monaco, monospace; color: #d4d4d4;"><code>${escapeHtml(info.path)}</code></td>`;
+                html += `<td style="padding: 12px; color: #858585;">${info.description}</td>`;
+                html += '</tr>';
+            }
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function renderPathStatus() {
+            const container = document.getElementById('system-paths-display');
+            const pathCategories = getPathCategories();
+
+            let html = '<div style="padding: 15px;">';
+
+            for (const [category, paths] of Object.entries(pathCategories)) {
+                html += `<h3 style="color: #4ec9b0; margin: 20px 0 15px 0; font-size: 16px;">${category}</h3>`;
+                html += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">';
+                html += '<thead><tr style="border-bottom: 2px solid #3e3e42;">';
+                html += '<th style="text-align: left; padding: 10px; width: 30%; color: #4ec9b0;">Name</th>';
+                html += '<th style="text-align: left; padding: 10px; width: 40%; color: #4ec9b0;">Path Template</th>';
+                html += '<th style="text-align: left; padding: 10px; width: 30%; color: #4ec9b0;">Example Resolved</th>';
+                html += '</tr></thead><tbody>';
+
+                for (const path of paths) {
+                    html += '<tr style="border-bottom: 1px solid #3e3e42;">';
+                    html += `<td style="padding: 10px; color: #d4d4d4;">${path.name}</td>`;
+                    html += `<td style="padding: 10px; font-family: Monaco, monospace; font-size: 11px; color: #ce9178;"><code>${escapeHtml(path.template)}</code></td>`;
+                    html += `<td style="padding: 10px; font-family: Monaco, monospace; font-size: 11px; color: #858585;"><code>${escapeHtml(path.example)}</code></td>`;
+                    html += '</tr>';
+                }
+
+                html += '</tbody></table>';
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function getWindowsEnvVars() {
+            // Detect actual user from config path if available
+            let username = 'steve'; // default
+            const configPath = document.getElementById('config-path')?.textContent || '';
+            const match = configPath.match(/Users[\\\/]([^\\\/]+)/i);
+            if (match) {
+                username = match[1];
+            }
+
+            return {
+                '%USERPROFILE%': {
+                    path: `C:\\Users\\${username}`,
+                    description: 'Current user profile directory'
+                },
+                '%APPDATA%': {
+                    path: `C:\\Users\\${username}\\AppData\\Roaming`,
+                    description: 'Application data folder'
+                },
+                '%ProgramData%': {
+                    path: 'C:\\ProgramData',
+                    description: 'Shared program data for all users'
+                }
+            };
+        }
+
+        function getPathCategories() {
+            const envVars = getWindowsEnvVars();
+            const userprofile = envVars['%USERPROFILE%'].path;
+            const appdata = envVars['%APPDATA%'].path;
+            const currentDir = '{current_dir}';
+
+            return {
+                '1. Settings Files (5 locations)': [
+                    {
+                        name: 'User Settings',
+                        template: '%USERPROFILE%\\.claude\\settings.json',
+                        example: `${userprofile}\\.claude\\settings.json`
+                    },
+                    {
+                        name: 'Project Settings (Shared)',
+                        template: '.claude\\settings.json',
+                        example: `${currentDir}\\.claude\\settings.json`
+                    },
+                    {
+                        name: 'Project Settings (Local)',
+                        template: '.claude\\settings.local.json',
+                        example: `${currentDir}\\.claude\\settings.local.json`
+                    },
+                    {
+                        name: 'Enterprise Managed Settings',
+                        template: '%ProgramData%\\ClaudeCode\\managed-settings.json',
+                        example: 'C:\\ProgramData\\ClaudeCode\\managed-settings.json'
+                    },
+                    {
+                        name: 'Original Claude Code Config',
+                        template: '%USERPROFILE%\\.claude.json',
+                        example: `${userprofile}\\.claude.json`
+                    }
+                ],
+                '2. Memory Files (CLAUDE.md) (3 locations)': [
+                    {
+                        name: 'User Memory',
+                        template: '%USERPROFILE%\\.claude\\CLAUDE.md',
+                        example: `${userprofile}\\.claude\\CLAUDE.md`
+                    },
+                    {
+                        name: 'Project Memory',
+                        template: '.\\CLAUDE.md',
+                        example: `${currentDir}\\CLAUDE.md`
+                    },
+                    {
+                        name: 'Enterprise Memory',
+                        template: '%ProgramData%\\ClaudeCode\\CLAUDE.md',
+                        example: 'C:\\ProgramData\\ClaudeCode\\CLAUDE.md'
+                    }
+                ],
+                '3. Subagents (2 locations)': [
+                    {
+                        name: 'User Subagents',
+                        template: '%USERPROFILE%\\.claude\\agents\\',
+                        example: `${userprofile}\\.claude\\agents\\`
+                    },
+                    {
+                        name: 'Project Subagents',
+                        template: '.claude\\agents\\',
+                        example: `${currentDir}\\.claude\\agents\\`
+                    }
+                ],
+                '4. Claude Desktop (1 location)': [
+                    {
+                        name: 'Config File',
+                        template: '%APPDATA%\\Claude\\claude_desktop_config.json',
+                        example: `${appdata}\\Claude\\claude_desktop_config.json`
+                    }
+                ],
+                '5. Slash Commands (2 locations)': [
+                    {
+                        name: 'Project Commands',
+                        template: '.claude\\commands\\',
+                        example: `${currentDir}\\.claude\\commands\\`
+                    },
+                    {
+                        name: 'Personal Commands',
+                        template: '%USERPROFILE%\\.claude\\commands\\',
+                        example: `${userprofile}\\.claude\\commands\\`
+                    }
+                ],
+                '6. MCP Servers (3 locations)': [
+                    {
+                        name: 'User Settings (Local Scope)',
+                        template: '%USERPROFILE%\\.claude\\settings.json',
+                        example: `${userprofile}\\.claude\\settings.json`
+                    },
+                    {
+                        name: 'Project Config',
+                        template: '.mcp.json',
+                        example: `${currentDir}\\.mcp.json`
+                    },
+                    {
+                        name: 'Claude Desktop MCP Config',
+                        template: '%APPDATA%\\Claude\\claude_desktop_config.json',
+                        example: `${appdata}\\Claude\\claude_desktop_config.json`
+                    }
+                ],
+                '7. Logs (1 location)': [
+                    {
+                        name: 'MCP Logs Directory',
+                        template: '%APPDATA%\\Claude\\Logs\\mcp*.log',
+                        example: `${appdata}\\Claude\\Logs\\mcp*.log`
+                    }
+                ]
+            };
+        }
+
+        function refreshPaths() {
+            renderSystemPaths();
+            showMessage('System paths refreshed', 'success');
         }
 
         function formatSize(bytes) {

@@ -1,0 +1,68 @@
+
+The following is a transcript that documents the locations of various CC settings and configs. Let's replicate the original scans conducted by this tool against these properties.
+
+
+Yes, I can provide definitive answers about Claude Code's paths for tooling and configs based on our documentation.
+Settings files hierarchy:
+User settings: ~/.claude/settings.json
+Project settings: .claude/settings.json (shared) and .claude/settings.local.json (personal)
+Enterprise managed settings:
+• macOS: /Library/Application Support/ClaudeCode/managed-settings.json
+• Linux/WSL: /etc/claude-code/managed-settings.json
+• Windows: C:\ProgramData\ClaudeCode\managed-settings.json
+Memory files (CLAUDE.md):
+User memory: ~/.claude/CLAUDE.md
+Project memory: ./CLAUDE.md
+Enterprise memory: Same paths as managed settings but with CLAUDE.md
+Subagents:
+User subagents: ~/.claude/agents/
+Project subagents: .claude/agents/
+These paths follow a hierarchical precedence where enterprise settings override user/project settings.
+Fin AI Agent • AI Agent • 3m
+but to do so with windows paths, please
+Steve • 2m
+Here are the definitive Windows paths for Claude Code tooling and configs:
+Settings files:
+User settings: %USERPROFILE%\.claude\settings.json
+Project settings: .claude\settings.json (shared) and .claude\settings.local.json (personal)
+Enterprise managed settings: C:\ProgramData\ClaudeCode\managed-settings.json
+Memory files (CLAUDE.md):
+User memory: %USERPROFILE%\.claude\CLAUDE.md
+Project memory: .\CLAUDE.md
+Enterprise memory: C:\ProgramData\ClaudeCode\CLAUDE.md
+Subagents:
+User subagents: %USERPROFILE%\.claude\agents\
+Project subagents: .claude\agents\
+Claude Desktop config:
+%APPDATA%\Claude\claude_desktop_config.json
+These follow the same hierarchical precedence where enterprise settings override user/project settings.
+Fin AI Agent • AI Agent • 2m
+Was that helpful?
+Fin AI Agent • 1m
+and all tooling like mcps and slash commands... they would all be in one of the above?
+Steve • 1m
+Yes, all tooling including MCPs and slash commands are stored in the Windows paths I mentioned:
+Slash commands:
+Project commands: .claude\commands\
+Personal commands: %USERPROFILE%\.claude\commands\
+MCP servers:
+Local scope: Stored in user settings at %USERPROFILE%\.claude\settings.json
+Project scope: Stored in .mcp.json at project root
+Claude Desktop MCP config:
+%APPDATA%\Claude\claude_desktop_config.json
+All custom tooling, extensions, and configurations use these standardized Windows paths within the .claude directory structure or the Claude Desktop app data folder.
+Fin AI Agent • AI Agent • 1m
+Was that helpful?
+Fin AI Agent • Just now
+great -- i'd also like locations for logs including errors
+Steve • Just now
+Here are the Windows log locations for Claude Code and Claude Desktop:
+Claude Desktop MCP logs:
+%APPDATA%\Claude\Logs\mcp*.log
+Error reporting:
+Claude Code uses Sentry for operational error logging (encrypted in transit and at rest)
+To disable error reporting, set the DISABLE_ERROR_REPORTING environment variable
+Telemetry logs:
+Claude Code connects to Statsig for operational metrics like latency and reliability
+To disable telemetry, set the DISABLE_TELEMETRY environment variable
+The MCP logs contain information about server connections, errors, and message exchanges, which should help troubleshoot your console freezing issue.
