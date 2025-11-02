@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(python windows_scan.py:*)",
+      "Bash(echo:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)",
+      "Bash(.venvScriptspython.exe -m pip install --upgrade pip)",
+      "Bash(.venv/Scripts/python.exe:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
