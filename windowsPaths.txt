@@ -1,31 +1,9 @@
 
-The following is a transcript that documents the locations of various CC settings and configs. Let's replicate the original scans conducted by this tool against these properties.
-
-
-Yes, I can provide definitive answers about Claude Code's paths for tooling and configs based on our documentation.
-Settings files hierarchy:
-User settings: ~/.claude/settings.json
-Project settings: .claude/settings.json (shared) and .claude/settings.local.json (personal)
-Enterprise managed settings:
-• macOS: /Library/Application Support/ClaudeCode/managed-settings.json
-• Linux/WSL: /etc/claude-code/managed-settings.json
-• Windows: C:\ProgramData\ClaudeCode\managed-settings.json
-Memory files (CLAUDE.md):
-User memory: ~/.claude/CLAUDE.md
-Project memory: ./CLAUDE.md
-Enterprise memory: Same paths as managed settings but with CLAUDE.md
-Subagents:
-User subagents: ~/.claude/agents/
-Project subagents: .claude/agents/
-These paths follow a hierarchical precedence where enterprise settings override user/project settings.
-Fin AI Agent • AI Agent • 3m
-but to do so with windows paths, please
-Steve • 2m
 Here are the definitive Windows paths for Claude Code tooling and configs:
 Settings files:
 User settings: %USERPROFILE%\.claude\settings.json
 Project settings: .claude\settings.json (shared) and .claude\settings.local.json (personal)
-Enterprise managed settings: C:\ProgramData\ClaudeCode\managed-settings.json
+Enterprise managed settings: \managed-settings.json
 Memory files (CLAUDE.md):
 User memory: %USERPROFILE%\.claude\CLAUDE.md
 Project memory: .\CLAUDE.md
