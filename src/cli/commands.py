@@ -382,5 +382,162 @@ def show_stats() -> None:
     asyncio.run(_stats())
 
 
+@snapshot_app.command("compare")
+def compare_snapshots(
+    snapshot_id: int = typer.Argument(..., help="Current snapshot ID"),
+    previous_id: Optional[int] = typer.Option(
+        None,
+        "--previous",
+        "-p",
+        help="Previous snapshot ID (auto-detected if not specified)",
+    ),
+    output_format: str = typer.Option(
+        "cli",
+        "--format",
+        "-f",
+        help="Output format: cli, json, html",
+    ),
+    output_file: Optional[str] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output file path (stdout if not specified)",
+    ),
+) -> None:
+    """Compare two snapshots and show changes."""
+    console.print(f"\n[bold cyan]Comparing Snapshots[/bold cyan]\n")
+
+    async def _compare() -> None:
+        from src.reports.generators import generate_change_report
+        from src.reports.formatters import CLIFormatter, JSONFormatter, HTMLFormatter
+
+        settings = get_settings()
+        db = await init_database(settings.database_url, echo=False)
+
+        try:
+            async with db.get_session() as session:
+                # Generate report
+                report = await generate_change_report(
+                    session,
+                    snapshot_id=snapshot_id,
+                    previous_snapshot_id=previous_id,
+                )
+
+                # Format output
+                if output_format == "json":
+                    formatter = JSONFormatter()
+                elif output_format == "html":
+                    formatter = HTMLFormatter()
+                else:
+                    formatter = CLIFormatter()
+
+                output_text = formatter.format_change_report(report)
+
+                # Write to file or stdout
+                if output_file:
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(output_text)
+                    console.print(f"[green]Report saved to {output_file}[/green]")
+                else:
+                    # For CLI format, just print without console markup to avoid encoding issues
+                    if output_format == "cli":
+                        print(output_text)
+                    else:
+                        console.print(output_text)
+
+        except ValueError as e:
+            console.print(f"[red]Error: {e}[/red]")
+        finally:
+            await close_database()
+
+    asyncio.run(_compare())
+
+
+@snapshot_app.command("report")
+def generate_report(
+    snapshot_id: int = typer.Argument(..., help="Snapshot ID to report on"),
+    output_format: str = typer.Option(
+        "cli",
+        "--format",
+        "-f",
+        help="Output format: cli, json, html",
+    ),
+    output_file: Optional[str] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output file path (stdout if not specified)",
+    ),
+) -> None:
+    """Generate a comprehensive snapshot report."""
+    console.print(f"\n[bold cyan]Generating Snapshot Report[/bold cyan]\n")
+
+    async def _report() -> None:
+        from src.reports.generators import generate_snapshot_report
+        from src.reports.formatters import CLIFormatter, JSONFormatter, HTMLFormatter
+
+        settings = get_settings()
+        db = await init_database(settings.database_url, echo=False)
+
+        try:
+            async with db.get_session() as session:
+                # Generate report
+                report = await generate_snapshot_report(session, snapshot_id)
+
+                # Format output
+                if output_format == "json":
+                    formatter = JSONFormatter()
+                elif output_format == "html":
+                    formatter = HTMLFormatter()
+                else:
+                    formatter = CLIFormatter()
+
+                output_text = formatter.format_snapshot_report(report)
+
+                # Write to file or stdout
+                if output_file:
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(output_text)
+                    console.print(f"[green]Report saved to {output_file}[/green]")
+                else:
+                    # For CLI format, just print without console markup to avoid encoding issues
+                    if output_format == "cli":
+                        print(output_text)
+                    else:
+                        console.print(output_text)
+
+        except ValueError as e:
+            console.print(f"[red]Error: {e}[/red]")
+        finally:
+            await close_database()
+
+    asyncio.run(_report())
+
+
+@app.command("dedup")
+def show_deduplication() -> None:
+    """Show deduplication statistics across all snapshots."""
+    console.print("\n[bold cyan]Deduplication Analysis[/bold cyan]\n")
+
+    async def _dedup() -> None:
+        from src.reports.generators import generate_deduplication_report
+        from src.reports.formatters import CLIFormatter
+
+        settings = get_settings()
+        db = await init_database(settings.database_url, echo=False)
+
+        try:
+            async with db.get_session() as session:
+                report = await generate_deduplication_report(session)
+                formatter = CLIFormatter()
+                output_text = formatter.format_deduplication_report(report)
+                console.print(output_text)
+
+        finally:
+            await close_database()
+
+    asyncio.run(_dedup())
+
+
 if __name__ == "__main__":
     app()

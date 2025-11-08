@@ -427,7 +427,9 @@ class PathScanner:
         snapshot.parent_snapshot_id = previous.id
 
         # Load paths for both snapshots
-        current_paths = {p.path_template: p for p in snapshot.paths}
+        stmt = select(SnapshotPath).where(SnapshotPath.snapshot_id == snapshot.id)
+        result = await self.session.execute(stmt)
+        current_paths = {p.path_template: p for p in result.scalars()}
 
         stmt = select(SnapshotPath).where(SnapshotPath.snapshot_id == previous.id)
         result = await self.session.execute(stmt)
