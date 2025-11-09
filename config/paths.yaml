@@ -1,0 +1,209 @@
+# Claude Configuration Path Definitions
+#
+# This file defines all Claude Code and Claude Desktop configuration paths
+# that the scanner will monitor and snapshot.
+#
+# Environment Variables:
+# - %USERPROFILE% → User's home directory (C:\Users\{username} on Windows)
+# - %APPDATA% → Application data directory (C:\Users\{username}\AppData\Roaming on Windows)
+# - %ProgramData% → Shared program data (C:\ProgramData on Windows)
+#
+# For cross-platform compatibility, these will be expanded to appropriate paths
+# based on the operating system.
+
+# Scanner configuration
+scanner:
+  version: "1.0"
+  description: "Claude Code and Claude Desktop configuration paths"
+  
+# Path definitions
+# Each path has:
+# - category: Logical grouping of paths
+# - name: Human-readable identifier
+# - template: Path template with environment variables
+# - enabled: Whether to scan this path (default: true)
+# - options: Additional scanning options (optional)
+
+paths:
+  # ==========================================
+  # Category: Settings Files
+  # ==========================================
+  - category: "Settings Files"
+    name: "User Settings"
+    template: "%USERPROFILE%/.claude/settings.json"
+    description: "User-level Claude Code settings"
+    enabled: true
+    
+  - category: "Settings Files"
+    name: "Project Settings (Shared)"
+    template: ".claude/settings.json"
+    description: "Project-level shared settings (checked into git)"
+    enabled: true
+    
+  - category: "Settings Files"
+    name: "Project Settings (Local)"
+    template: ".claude/settings.local.json"
+    description: "Project-level local settings (gitignored)"
+    enabled: true
+    
+  - category: "Settings Files"
+    name: "Enterprise Managed Settings"
+    template: "%ProgramData%/ClaudeCode/managed-settings.json"
+    description: "Enterprise-managed settings (admin-controlled)"
+    enabled: true
+    
+  - category: "Settings Files"
+    name: "Original Claude Code Config"
+    template: "%USERPROFILE%/.claude.json"
+    description: "Legacy Claude Code configuration file"
+    enabled: true
+
+  # ==========================================
+  # Category: Memory Files (CLAUDE.md)
+  # ==========================================
+  - category: "Memory Files (CLAUDE.md)"
+    name: "User Memory"
+    template: "%USERPROFILE%/.claude/CLAUDE.md"
+    description: "User-level memory file"
+    enabled: true
+    
+  - category: "Memory Files (CLAUDE.md)"
+    name: "Project Memory"
+    template: ".claude/CLAUDE.md"
+    description: "Project-level memory file"
+    enabled: true
+    
+  - category: "Memory Files (CLAUDE.md)"
+    name: "Enterprise Memory"
+    template: "%ProgramData%/ClaudeCode/CLAUDE.md"
+    description: "Enterprise-level memory file"
+    enabled: true
+
+  # ==========================================
+  # Category: Subagents
+  # ==========================================
+  - category: "Subagents"
+    name: "User Subagents"
+    template: "%USERPROFILE%/.claude/subagents"
+    description: "User-level subagent definitions"
+    enabled: true
+    options:
+      type: "directory"
+      
+  - category: "Subagents"
+    name: "Project Subagents"
+    template: ".claude/subagents"
+    description: "Project-level subagent definitions"
+    enabled: true
+    options:
+      type: "directory"
+
+  # ==========================================
+  # Category: Claude Desktop
+  # ==========================================
+  - category: "Claude Desktop"
+    name: "Claude Desktop Config"
+    template: "%APPDATA%/Claude/claude_desktop_config.json"
+    description: "Claude Desktop application configuration"
+    enabled: true
+
+  # ==========================================
+  # Category: Slash Commands
+  # ==========================================
+  - category: "Slash Commands"
+    name: "User Commands"
+    template: "%USERPROFILE%/.claude/commands"
+    description: "User-level slash command definitions"
+    enabled: true
+    options:
+      type: "directory"
+      
+  - category: "Slash Commands"
+    name: "Project Commands"
+    template: ".claude/commands"
+    description: "Project-level slash command definitions"
+    enabled: true
+    options:
+      type: "directory"
+
+  # ==========================================
+  # Category: MCP Servers
+  # ==========================================
+  - category: "MCP Servers"
+    name: "Claude Desktop MCP Config"
+    template: "%APPDATA%/Claude/claude_desktop_config.json"
+    description: "MCP servers configured in Claude Desktop"
+    enabled: true
+    
+  - category: "MCP Servers"
+    name: "User MCP Config"
+    template: "%USERPROFILE%/.claude/mcp.json"
+    description: "User-level MCP server configuration"
+    enabled: true
+    
+  - category: "MCP Servers"
+    name: "Project MCP Config"
+    template: ".claude/mcp.json"
+    description: "Project-level MCP server configuration"
+    enabled: true
+
+  # ==========================================
+  # Category: Logs
+  # ==========================================
+  - category: "Logs"
+    name: "Claude Desktop Logs"
+    template: "%APPDATA%/Claude/logs"
+    description: "Claude Desktop application logs"
+    enabled: true
+    options:
+      type: "directory"
+      enumerate_logs: true
+      log_pattern: "mcp*.log"
+
+# Platform-specific path mappings
+# Override default environment variable mappings per platform
+platform_mappings:
+  Windows:
+    "%USERPROFILE%": "~"
+    "%APPDATA%": "~/AppData/Roaming"
+    "%ProgramData%": "C:/ProgramData"
+    
+  Darwin:  # macOS
+    "%USERPROFILE%": "~"
+    "%APPDATA%": "~/Library/Application Support"
+    "%ProgramData%": "/Library/Application Support"
+    
+  Linux:
+    "%USERPROFILE%": "~"
+    "%APPDATA%": "~/.config"
+    "%ProgramData%": "/usr/share"
+
+# Scanner options
+options:
+  # Maximum file size to read content (in MB)
+  max_file_size_mb: 100
+  
+  # Whether to follow symbolic links
+  follow_symlinks: false
+  
+  # Whether to hash file contents
+  hash_contents: true
+  
+  # Hash algorithm (md5, sha1, sha256)
+  hash_algorithm: "sha256"
+  
+  # Whether to store file contents in database
+  store_contents: true
+  
+  # Whether to enumerate logs matching pattern
+  enumerate_logs: true
+  
+  # Timeout for scanning a single path (seconds)
+  scan_timeout: 30
+  
+  # Whether to skip paths that fail to scan
+  skip_errors: true
+  
+  # Log level for scanner operations
+  log_level: "INFO"
+

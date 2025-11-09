@@ -55,6 +55,7 @@ class DatabaseManager:
         This should be called once at application startup.
         """
         logger.info(f"Initializing database: {self.database_url}")
+        logger.debug(f"Database configuration: echo={self.echo}")
 
         # Create engine with optimized settings for SQLite
         self.engine = create_async_engine(
@@ -99,21 +100,29 @@ class DatabaseManager:
             Path(db_path).parent.mkdir(parents=True, exist_ok=True)
 
         # Create all tables
-        await self.create_tables()
-
-        logger.info("Database initialized successfully")
+        try:
+            await self.create_tables()
+            logger.info("Database initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}", exc_info=True)
+            raise
 
     async def create_tables(self) -> None:
         """Create all database tables from models."""
         logger.info("Creating database tables...")
 
         if self.engine is None:
+            logger.error("Database engine not initialized")
             raise RuntimeError("Database engine not initialized. Call initialize() first.")
 
-        async with self.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        try:
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
 
-        logger.info("Database tables created successfully")
+            logger.info("Database tables created successfully")
+        except Exception as e:
+            logger.error(f"Failed to create database tables: {e}", exc_info=True)
+            raise
 
     async def drop_tables(self) -> None:
         """
@@ -180,8 +189,10 @@ class DatabaseManager:
             Dictionary with table row counts and database size
         """
         if self.engine is None:
+            logger.error("Database not initialized when getting stats")
             raise RuntimeError("Database not initialized. Call initialize() first.")
 
+        logger.debug("Collecting database statistics")
         stats: dict[str, int] = {}
 
         async with self.engine.begin() as conn:
@@ -210,6 +221,7 @@ class DatabaseManager:
                 size = result.scalar()
                 stats["database_size_bytes"] = size or 0
 
+        logger.debug(f"Database statistics collected: {stats}")
         return stats
 
     async def vacuum(self) -> None:
@@ -235,16 +247,19 @@ class DatabaseManager:
         Returns:
             True if database is healthy, False otherwise
         """
+        logger.debug("Performing database health check")
         try:
             if self.engine is None:
+                logger.warning("Database health check failed: engine not initialized")
                 return False
 
             async with self.engine.begin() as conn:
                 await conn.execute(text("SELECT 1"))
 
+            logger.debug("Database health check passed")
             return True
         except Exception as e:
-            logger.error(f"Database health check failed: {e}")
+            logger.error(f"Database health check failed: {e}", exc_info=True)
             return False
 
 

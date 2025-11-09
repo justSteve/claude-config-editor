@@ -1,0 +1,44 @@
+# Testing Configuration
+# Optimized for automated testing with in-memory database and minimal logging
+
+# Application Environment
+environment: testing
+
+# Database Configuration
+database:
+  url: "sqlite+aiosqlite:///:memory:"  # In-memory database for tests
+  echo: false
+  
+# API Server Configuration
+api:
+  host: "127.0.0.1"
+  port: 0  # Random port for tests
+  reload: false
+  debug: false
+  
+# Logging Configuration
+logging:
+  level: "WARNING"  # Minimal logging during tests
+  file: null  # No file logging during tests
+  max_bytes: 10485760
+  backup_count: 1
+  console_output: false
+  
+# Snapshot Configuration
+snapshot:
+  retention_days: 0  # Don't delete snapshots in tests
+  auto_compress: false
+  compress_threshold_mb: 100  # Don't compress in tests
+  
+# Security
+security:
+  api_key: null
+  cors_origins:
+    - "*"  # Allow all origins in tests
+
+# Testing-specific options
+test_options:
+  use_fixtures: true
+  cleanup_after_test: true
+  parallel_tests: false
+

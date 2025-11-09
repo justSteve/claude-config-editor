@@ -3,6 +3,17 @@ r"""
 Comprehensive Windows Path Scanner for Claude Code & Claude Desktop
 Replicates and extends the original scan from server.py to cover all documented locations
 
+⚠️ DEPRECATED: This standalone scanner is being phased out in favor of the integrated
+scanner in src/core/scanner.py which uses config/paths.yaml for path definitions
+and stores results in the database for version control.
+
+For new use cases, please use:
+    python -m src.cli.commands snapshot create
+
+This legacy scanner will be removed in a future version.
+
+---
+
 This scanner uses Windows environment variables that are automatically expanded:
 - %USERPROFILE% → C:\Users\{username}
 - %APPDATA% → C:\Users\{username}\AppData\Roaming
@@ -17,6 +28,7 @@ from pathlib import Path
 import json
 from datetime import datetime
 
+
 def format_size(size_bytes):
     """Format bytes to human-readable size"""
     if size_bytes < 1024:
@@ -25,6 +37,7 @@ def format_size(size_bytes):
         return f"{size_bytes / 1024:.2f} KB"
     else:
         return f"{size_bytes / (1024 * 1024):.2f} MB"
+
 
 def get_file_info(path):
     """Get detailed file information"""
@@ -43,6 +56,7 @@ def get_file_info(path):
             'error': str(e)
         }
 
+
 def count_items_in_dir(path):
     """Count items in a directory"""
     try:
@@ -53,11 +67,13 @@ def count_items_in_dir(path):
     except Exception:
         return 0
 
+
 def scan_windows_paths():
     """Scan all documented Windows paths for Claude Code and Claude Desktop"""
 
     if platform.system() != 'Windows':
-        print(f"⚠️  This scanner is designed for Windows. Current OS: {platform.system()}")
+        print(
+            f"⚠️  This scanner is designed for Windows. Current OS: {platform.system()}")
         print("   Paths will be adapted but may not match Windows structure.\n")
 
     # Expand Windows environment variables to fully qualified paths
@@ -192,9 +208,11 @@ def scan_windows_paths():
             # Find all mcp*.log files
             mcp_logs = list(logs_dir.glob('mcp*.log'))
             logs_info['mcp_log_count'] = len(mcp_logs)
-            logs_info['mcp_logs'] = [str(log.name) for log in mcp_logs[:10]]  # First 10
+            logs_info['mcp_logs'] = [str(log.name)
+                                     for log in mcp_logs[:10]]  # First 10
             if len(mcp_logs) > 10:
-                logs_info['mcp_logs'].append(f"... and {len(mcp_logs) - 10} more")
+                logs_info['mcp_logs'].append(
+                    f"... and {len(mcp_logs) - 10} more")
         except Exception as e:
             logs_info['error'] = str(e)
 
@@ -204,6 +222,7 @@ def scan_windows_paths():
     }
 
     return results
+
 
 def print_results(results):
     """Print scan results in organized format"""
@@ -280,6 +299,7 @@ def print_results(results):
     print(f"Detection rate: {(total_found / total_scanned * 100):.1f}%")
     print()
 
+
 def export_results_json(results, output_file='scan_results.json'):
     """Export results to JSON file"""
     try:
@@ -290,6 +310,7 @@ def export_results_json(results, output_file='scan_results.json'):
     except Exception as e:
         print(f"❌ Failed to export results: {e}")
         return False
+
 
 def main():
     """Main function"""
@@ -305,6 +326,24 @@ def main():
     quiet = '--quiet' in sys.argv or '-q' in sys.argv
 
     if not quiet:
+        # Show deprecation warning
+        print("\n" + "=" * 80)
+        print("⚠️  DEPRECATION WARNING")
+        print("=" * 80)
+        print("This standalone scanner (windows_scan.py) is deprecated and will be removed")
+        print("in a future version. Please use the integrated scanner instead:")
+        print("")
+        print("  python -m src.cli.commands snapshot create")
+        print("")
+        print("The integrated scanner offers:")
+        print("  • Database storage for version control")
+        print("  • Change detection between scans")
+        print("  • Configuration-based path definitions (config/paths.yaml)")
+        print("  • Better error handling and logging")
+        print("  • Rich terminal output")
+        print("=" * 80)
+        print("")
+
         print("\n🔍 Starting comprehensive Windows path scan...")
         print(f"📅 Scan time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()
@@ -326,6 +365,7 @@ def main():
         print("=" * 80)
         print("\n💡 Tip: Use '--json' or '-j' flag to export results to JSON")
         print("   Example: python windows_scan.py --json")
+
 
 if __name__ == '__main__':
     main()
