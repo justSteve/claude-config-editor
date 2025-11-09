@@ -1,0 +1,46 @@
+# Development Configuration
+# Optimized for local development with verbose logging and debugging
+
+# Application Environment
+environment: development
+
+# Database Configuration
+database:
+  url: "sqlite+aiosqlite:///data/claude_config.db"
+  echo: true  # Log SQL statements for debugging
+  
+# API Server Configuration
+api:
+  host: "127.0.0.1"
+  port: 8765
+  reload: true  # Auto-reload on code changes
+  debug: true
+  
+# Logging Configuration
+logging:
+  level: "DEBUG"
+  file: "logs/app.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+  console_output: true
+  
+# Snapshot Configuration
+snapshot:
+  retention_days: 90
+  auto_compress: false  # Don't compress in dev for easier debugging
+  compress_threshold_mb: 1
+  
+# Security (optional for dev)
+security:
+  api_key: null  # No API key required in development
+  cors_origins:
+    - "http://localhost:8765"
+    - "http://127.0.0.1:8765"
+    - "http://localhost:3000"  # For frontend development
+
+# Development-specific options
+dev_options:
+  hot_reload: true
+  profiling: false
+  mock_data: false
+

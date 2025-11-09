@@ -1,0 +1,45 @@
+# Production Configuration
+# Optimized for production deployment with security and performance
+
+# Application Environment
+environment: production
+
+# Database Configuration
+database:
+  url: "sqlite+aiosqlite:///data/claude_config.db"
+  echo: false  # Don't log SQL in production
+  
+# API Server Configuration
+api:
+  host: "127.0.0.1"
+  port: 8765
+  reload: false  # No auto-reload in production
+  debug: false
+  
+# Logging Configuration
+logging:
+  level: "INFO"
+  file: "logs/app.log"
+  max_bytes: 52428800  # 50MB
+  backup_count: 10
+  console_output: false  # Log to file only
+  
+# Snapshot Configuration
+snapshot:
+  retention_days: 180  # Keep snapshots longer in production
+  auto_compress: true
+  compress_threshold_mb: 1
+  
+# Security
+security:
+  api_key: null  # Set via environment variable if needed
+  cors_origins:
+    - "http://localhost:8765"
+    - "http://127.0.0.1:8765"
+
+# Production-specific options
+prod_options:
+  optimize_queries: true
+  cache_enabled: true
+  metrics_enabled: false
+

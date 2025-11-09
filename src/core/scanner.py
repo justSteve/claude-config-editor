@@ -28,6 +28,7 @@ from src.core.models import (
     SnapshotPath,
     SnapshotChange,
 )
+from src.core.path_loader import load_path_definitions
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,35 @@ class PathScanner:
         """
         self.session = session
 
-    def get_path_definitions(self) -> list[dict[str, str]]:
+    def get_path_definitions(self) -> list[dict[str, Any]]:
         """
-        Get all Claude configuration path definitions.
+        Get all Claude configuration path definitions from configuration.
 
         Returns:
-            List of path definitions with category, name, and template
+            List of path definitions with category, name, template, and resolved path
+        """
+        try:
+            # Load path definitions from config/paths.yaml
+            path_defs = load_path_definitions()
+            logger.debug(
+                f"Loaded {len(path_defs)} path definitions from configuration")
+            return path_defs
+        except Exception as e:
+            logger.error(
+                f"Failed to load path definitions from configuration: {e}")
+            logger.warning("Falling back to hardcoded path definitions")
+            # Fallback to hardcoded paths if config loading fails
+            return self._get_fallback_path_definitions()
+
+    def _get_fallback_path_definitions(self) -> list[dict[str, str]]:
+        """
+        Fallback path definitions if configuration file cannot be loaded.
+
+        This ensures the scanner can still function if the config file is missing
+        or invalid, using the original hardcoded definitions.
+
+        Returns:
+            List of fallback path definitions
         """
         # Expand environment variables
         userprofile = Path(os.path.expandvars("%USERPROFILE%"))
@@ -193,7 +217,8 @@ class PathScanner:
         Returns:
             Created Snapshot object
         """
-        logger.info(f"Creating snapshot (trigger={trigger_type}, by={triggered_by})")
+        logger.info(
+            f"Creating snapshot (trigger={trigger_type}, by={triggered_by})")
 
         # Collect system context
         os_type = platform.system()
@@ -228,7 +253,8 @@ class PathScanner:
             p.content_hash for p in scanned_paths if p.content_hash is not None
         ]
         snapshot_hash_input = "|".join(sorted(content_hashes))
-        snapshot_hash = hashlib.sha256(snapshot_hash_input.encode()).hexdigest()
+        snapshot_hash = hashlib.sha256(
+            snapshot_hash_input.encode()).hexdigest()
 
         # Create snapshot object
         snapshot = Snapshot(
@@ -272,10 +298,26 @@ class PathScanner:
         ]
         self.session.add_all(env_vars)
 
-        # Update scanned paths with snapshot ID
+        # Update scanned paths with snapshot ID and add annotations
         for path_obj in scanned_paths:
             path_obj.snapshot_id = snapshot.id
             self.session.add(path_obj)
+
+            # Add any annotations created during scanning (e.g., MCP logs)
+            if hasattr(path_obj, "_annotations"):
+                for annotation in path_obj._annotations:
+                    annotation.snapshot_id = snapshot.id
+                    # snapshot_path_id will be set after flush
+
+        # Flush to get IDs for paths
+        await self.session.flush()
+
+        # Now update annotation snapshot_path_id references
+        for path_obj in scanned_paths:
+            if hasattr(path_obj, "_annotations"):
+                for annotation in path_obj._annotations:
+                    annotation.snapshot_path_id = path_obj.id
+                    self.session.add(annotation)
 
         # Detect changes from previous snapshot
         await self._detect_changes(snapshot)
@@ -318,9 +360,12 @@ class PathScanner:
                     snapshot_path.type = "file"
                     stat = path.stat()
                     snapshot_path.size_bytes = stat.st_size
-                    snapshot_path.modified_time = datetime.fromtimestamp(stat.st_mtime)
-                    snapshot_path.created_time = datetime.fromtimestamp(stat.st_ctime)
-                    snapshot_path.accessed_time = datetime.fromtimestamp(stat.st_atime)
+                    snapshot_path.modified_time = datetime.fromtimestamp(
+                        stat.st_mtime)
+                    snapshot_path.created_time = datetime.fromtimestamp(
+                        stat.st_ctime)
+                    snapshot_path.accessed_time = datetime.fromtimestamp(
+                        stat.st_atime)
 
                     # Read and hash content
                     content = path.read_bytes()
@@ -337,6 +382,10 @@ class PathScanner:
                     snapshot_path.type = "directory"
                     items = list(path.iterdir())
                     snapshot_path.item_count = len(items)
+
+                    # Special handling for logs directory: enumerate MCP log files
+                    if self._should_enumerate_logs(path_def):
+                        await self._enumerate_mcp_logs(path, snapshot_path, path_def)
 
         except Exception as e:
             snapshot_path.error_message = str(e)
@@ -359,7 +408,8 @@ class PathScanner:
             FileContent object
         """
         # Check if content already exists
-        stmt = select(FileContent).where(FileContent.content_hash == content_hash)
+        stmt = select(FileContent).where(
+            FileContent.content_hash == content_hash)
         result = await self.session.execute(stmt)
         existing = result.scalar_one_or_none()
 
@@ -427,11 +477,13 @@ class PathScanner:
         snapshot.parent_snapshot_id = previous.id
 
         # Load paths for both snapshots
-        stmt = select(SnapshotPath).where(SnapshotPath.snapshot_id == snapshot.id)
+        stmt = select(SnapshotPath).where(
+            SnapshotPath.snapshot_id == snapshot.id)
         result = await self.session.execute(stmt)
         current_paths = {p.path_template: p for p in result.scalars()}
 
-        stmt = select(SnapshotPath).where(SnapshotPath.snapshot_id == previous.id)
+        stmt = select(SnapshotPath).where(
+            SnapshotPath.snapshot_id == previous.id)
         result = await self.session.execute(stmt)
         previous_paths = {p.path_template: p for p in result.scalars()}
 
@@ -498,3 +550,91 @@ class PathScanner:
         logger.info(
             f"Detected {change_count} changes from snapshot {previous.id}"
         )
+
+    def _should_enumerate_logs(self, path_def: dict[str, Any]) -> bool:
+        """
+        Check if log enumeration should be performed for this path.
+
+        Args:
+            path_def: Path definition
+
+        Returns:
+            True if logs should be enumerated
+        """
+        # Check if path has enumerate_logs option
+        options = path_def.get("options", {})
+        if options.get("enumerate_logs"):
+            return True
+
+        # Also enumerate for paths named "Claude Desktop Logs" for backward compatibility
+        if path_def.get("name") == "Claude Desktop Logs":
+            return True
+
+        return False
+
+    async def _enumerate_mcp_logs(
+        self,
+        path: Path,
+        snapshot_path: SnapshotPath,
+        path_def: dict[str, Any],
+    ) -> None:
+        """
+        Enumerate MCP log files in a logs directory.
+
+        Finds all files matching the pattern (default: mcp*.log) and stores
+        information about them in an annotation.
+
+        Args:
+            path: Path to logs directory
+            snapshot_path: SnapshotPath object being created
+            path_def: Path definition with options
+        """
+        try:
+            # Get log pattern from options, default to "mcp*.log"
+            options = path_def.get("options", {})
+            log_pattern = options.get("log_pattern", "mcp*.log")
+
+            # Find matching log files
+            log_files = list(path.glob(log_pattern))
+
+            if log_files:
+                # Create annotation with log file list
+                from src.core.models import Annotation
+
+                # Format log file information
+                log_info = {
+                    "log_count": len(log_files),
+                    "log_files": [
+                        {
+                            "name": log.name,
+                            "size": log.stat().st_size,
+                            "modified": datetime.fromtimestamp(log.stat().st_mtime).isoformat(),
+                        }
+                        for log in log_files[:50]  # Limit to first 50
+                    ],
+                }
+
+                if len(log_files) > 50:
+                    log_info["truncated"] = True
+                    log_info["total_logs"] = len(log_files)
+
+                # Store as JSON in annotation
+                annotation = Annotation(
+                    snapshot_id=snapshot_path.snapshot_id,
+                    snapshot_path_id=snapshot_path.id,
+                    annotation_text=json.dumps(log_info, indent=2),
+                    annotation_type="mcp_logs",
+                    created_by="scanner",
+                )
+
+                # Note: Annotation will be added to session when snapshot_path is added
+                # Store reference in snapshot_path for now
+                if not hasattr(snapshot_path, "_annotations"):
+                    snapshot_path._annotations = []
+                snapshot_path._annotations.append(annotation)
+
+                logger.info(
+                    f"Enumerated {len(log_files)} MCP log files in {path}"
+                )
+        except Exception as e:
+            logger.warning(f"Failed to enumerate MCP logs in {path}: {e}")
