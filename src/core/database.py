@@ -63,7 +63,8 @@ class DatabaseManager:
             echo=self.echo,
             poolclass=NullPool,  # Use NullPool for SQLite to avoid connection issues
             connect_args={
-                "check_same_thread": False,  # Allow multi-threaded access (safe with SQLite in WAL mode)
+                # Allow multi-threaded access (safe with SQLite in WAL mode)
+                "check_same_thread": False,
             },
         )
 
@@ -113,7 +114,8 @@ class DatabaseManager:
 
         if self.engine is None:
             logger.error("Database engine not initialized")
-            raise RuntimeError("Database engine not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "Database engine not initialized. Call initialize() first.")
 
         try:
             async with self.engine.begin() as conn:
@@ -121,7 +123,8 @@ class DatabaseManager:
 
             logger.info("Database tables created successfully")
         except Exception as e:
-            logger.error(f"Failed to create database tables: {e}", exc_info=True)
+            logger.error(
+                f"Failed to create database tables: {e}", exc_info=True)
             raise
 
     async def drop_tables(self) -> None:
@@ -133,7 +136,8 @@ class DatabaseManager:
         logger.warning("Dropping all database tables...")
 
         if self.engine is None:
-            raise RuntimeError("Database engine not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "Database engine not initialized. Call initialize() first.")
 
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
@@ -162,7 +166,8 @@ class DatabaseManager:
         ```
         """
         if self.session_factory is None:
-            raise RuntimeError("Database not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "Database not initialized. Call initialize() first.")
 
         async with self.session_factory() as session:
             try:
@@ -190,7 +195,8 @@ class DatabaseManager:
         """
         if self.engine is None:
             logger.error("Database not initialized when getting stats")
-            raise RuntimeError("Database not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "Database not initialized. Call initialize() first.")
 
         logger.debug("Collecting database statistics")
         stats: dict[str, int] = {}
@@ -231,7 +237,8 @@ class DatabaseManager:
         Should be run periodically, especially after deleting snapshots.
         """
         if self.engine is None:
-            raise RuntimeError("Database not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "Database not initialized. Call initialize() first.")
 
         logger.info("Vacuuming database...")
 
@@ -250,7 +257,8 @@ class DatabaseManager:
         logger.debug("Performing database health check")
         try:
             if self.engine is None:
-                logger.warning("Database health check failed: engine not initialized")
+                logger.warning(
+                    "Database health check failed: engine not initialized")
                 return False
 
             async with self.engine.begin() as conn:

@@ -151,10 +151,12 @@ class PathLoader:
             yaml.YAMLError: If config file is invalid YAML
             ValueError: If config file has invalid structure
         """
-        logger.debug(f"Attempting to load path configuration from {self.config_path}")
-        
+        logger.debug(
+            f"Attempting to load path configuration from {self.config_path}")
+
         if not self.config_path.exists():
-            logger.error(f"Path configuration file not found: {self.config_path}")
+            logger.error(
+                f"Path configuration file not found: {self.config_path}")
             raise FileNotFoundError(
                 f"Path configuration file not found: {self.config_path}")
 
@@ -164,14 +166,17 @@ class PathLoader:
             with open(self.config_path, "r", encoding="utf-8") as f:
                 config = yaml.safe_load(f)
         except yaml.YAMLError as e:
-            logger.error(f"Invalid YAML in path configuration: {e}", exc_info=True)
+            logger.error(
+                f"Invalid YAML in path configuration: {e}", exc_info=True)
             raise
         except Exception as e:
-            logger.error(f"Failed to read path configuration file: {e}", exc_info=True)
+            logger.error(
+                f"Failed to read path configuration file: {e}", exc_info=True)
             raise
 
         if not isinstance(config, dict):
-            logger.error("Invalid path configuration: root must be a dictionary")
+            logger.error(
+                "Invalid path configuration: root must be a dictionary")
             raise ValueError(
                 "Invalid path configuration: root must be a dictionary")
 
@@ -182,7 +187,8 @@ class PathLoader:
             raise ValueError(
                 "Invalid path configuration: 'paths' must be a list")
 
-        logger.debug(f"Found {len(paths_data)} path definitions in configuration")
+        logger.debug(
+            f"Found {len(paths_data)} path definitions in configuration")
 
         for path_data in paths_data:
             if not isinstance(path_data, dict):
@@ -211,14 +217,15 @@ class PathLoader:
         self.options = config.get("options", {})
 
         self._loaded = True
-        
+
         # Log statistics
         enabled_count = len([p for p in self.paths if p.enabled])
         logger.info(
             f"Loaded {len(self.paths)} path definitions "
             f"({enabled_count} enabled, {len(self.paths) - enabled_count} disabled)"
         )
-        logger.debug(f"Platform mappings configured for: {list(self.platform_mappings.keys())}")
+        logger.debug(
+            f"Platform mappings configured for: {list(self.platform_mappings.keys())}")
 
     def get_paths(
         self,

@@ -33,17 +33,21 @@ class ErrorResponse(BaseSchema):
 
     error: str = Field(..., description="Error message")
     error_type: Optional[str] = Field(None, description="Error type/category")
-    details: Optional[dict[str, Any]] = Field(None, description="Additional error details")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
+    details: Optional[dict[str, Any]] = Field(
+        None, description="Additional error details")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Error timestamp")
 
 
 class PaginationParams(BaseSchema):
     """Pagination parameters for list requests."""
 
     page: int = Field(default=1, ge=1, description="Page number (1-indexed)")
-    page_size: int = Field(default=50, ge=1, le=1000, description="Items per page")
+    page_size: int = Field(default=50, ge=1, le=1000,
+                           description="Items per page")
     sort_by: Optional[str] = Field(None, description="Field to sort by")
-    sort_order: str = Field(default="desc", pattern="^(asc|desc)$", description="Sort order (asc/desc)")
+    sort_order: str = Field(
+        default="desc", pattern="^(asc|desc)$", description="Sort order (asc/desc)")
 
     @property
     def offset(self) -> int:
@@ -68,7 +72,8 @@ class PaginatedResponse(BaseSchema, Generic[T]):
     page_size: int = Field(..., description="Items per page")
     total_pages: int = Field(..., description="Total number of pages")
     has_next: bool = Field(..., description="Whether there's a next page")
-    has_previous: bool = Field(..., description="Whether there's a previous page")
+    has_previous: bool = Field(...,
+                               description="Whether there's a previous page")
 
     @classmethod
     def create(
@@ -80,7 +85,7 @@ class PaginatedResponse(BaseSchema, Generic[T]):
     ) -> "PaginatedResponse[T]":
         """Create paginated response from items and parameters."""
         total_pages = (total + page_size - 1) // page_size if total > 0 else 0
-        
+
         return cls(
             items=items,
             total=total,
@@ -95,13 +100,15 @@ class PaginatedResponse(BaseSchema, Generic[T]):
 class TimeRangeFilter(BaseSchema):
     """Time range filter for queries."""
 
-    start_time: Optional[datetime] = Field(None, description="Start time (inclusive)")
-    end_time: Optional[datetime] = Field(None, description="End time (inclusive)")
+    start_time: Optional[datetime] = Field(
+        None, description="Start time (inclusive)")
+    end_time: Optional[datetime] = Field(
+        None, description="End time (inclusive)")
 
 
 class QueryParams(BaseSchema):
     """Base query parameters."""
 
     search: Optional[str] = Field(None, description="Search term")
-    filters: Optional[dict[str, Any]] = Field(None, description="Additional filters")
-
+    filters: Optional[dict[str, Any]] = Field(
+        None, description="Additional filters")

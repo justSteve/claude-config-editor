@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 class RequestContext:
     """
     Request context for tracking request-specific information.
-    
+
     Stores request ID, user info, and timing information for logging.
     """
-    
+
     def __init__(self, request_id: Optional[str] = None) -> None:
         """
         Initialize request context.
-        
+
         Args:
             request_id: Unique request ID (auto-generated if not provided)
         """
@@ -33,33 +33,33 @@ class RequestContext:
         self.path: Optional[str] = None
         self.status_code: Optional[int] = None
         self.metadata: dict[str, any] = {}
-    
+
     @staticmethod
     def _generate_request_id() -> str:
         """Generate a unique request ID."""
         return str(uuid.uuid4())[:8]
-    
+
     def set_user(self, user_id: str) -> None:
         """Set user ID for this request."""
         self.user_id = user_id
-    
+
     def set_request_info(self, method: str, path: str) -> None:
         """Set request method and path."""
         self.method = method
         self.path = path
-    
+
     def set_response_status(self, status_code: int) -> None:
         """Set response status code."""
         self.status_code = status_code
-    
+
     def add_metadata(self, key: str, value: any) -> None:
         """Add metadata to the request context."""
         self.metadata[key] = value
-    
+
     def get_duration_ms(self) -> float:
         """Get request duration in milliseconds."""
         return (time.time() - self.start_time) * 1000
-    
+
     def to_dict(self) -> dict:
         """Convert context to dictionary for logging."""
         return {
@@ -79,13 +79,13 @@ def log_request_start(
 ) -> None:
     """
     Log the start of a request.
-    
+
     Args:
         context: Request context
         logger_instance: Logger to use (defaults to module logger)
     """
     log = logger_instance or logger
-    
+
     log.info(
         f"Request started: {context.request_id} {context.method} {context.path}",
         extra={
@@ -102,16 +102,16 @@ def log_request_end(
 ) -> None:
     """
     Log the end of a request.
-    
+
     Args:
         context: Request context
         logger_instance: Logger to use (defaults to module logger)
     """
     log = logger_instance or logger
-    
+
     duration_ms = context.get_duration_ms()
     level = logging.INFO if context.status_code and context.status_code < 400 else logging.WARNING
-    
+
     log.log(
         level,
         f"Request completed: {context.request_id} {context.method} {context.path} "
@@ -134,16 +134,16 @@ def log_request_error(
 ) -> None:
     """
     Log a request error.
-    
+
     Args:
         context: Request context
         error: Exception that occurred
         logger_instance: Logger to use (defaults to module logger)
     """
     log = logger_instance or logger
-    
+
     duration_ms = context.get_duration_ms()
-    
+
     log.error(
         f"Request failed: {context.request_id} {context.method} {context.path} "
         f"({duration_ms:.2f}ms) - {error}",
@@ -163,16 +163,16 @@ def log_request_error(
 class AccessLogger:
     """
     Access logger for logging HTTP requests in Apache/Nginx style.
-    
+
     Usage:
         access_logger = AccessLogger(logger)
         access_logger.log(method, path, status_code, duration_ms)
     """
-    
+
     def __init__(self, logger_instance: logging.Logger) -> None:
         """Initialize access logger."""
         self.logger = logger_instance
-    
+
     def log(
         self,
         method: str,
@@ -185,7 +185,7 @@ class AccessLogger:
     ) -> None:
         """
         Log an access entry.
-        
+
         Args:
             method: HTTP method
             path: Request path
@@ -198,7 +198,7 @@ class AccessLogger:
         # Format similar to Apache combined log format
         user_str = user_id or "-"
         ip_str = ip_address or "-"
-        
+
         self.logger.info(
             f'{ip_str} {user_str} "{method} {path}" {status_code} {duration_ms:.2f}ms',
             extra={
@@ -211,4 +211,3 @@ class AccessLogger:
                 "user_agent": user_agent,
             },
         )
-
