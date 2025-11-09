@@ -144,4 +144,3 @@ __all__ = [
     "tag_to_response",
     "annotation_to_response",
 ]
-

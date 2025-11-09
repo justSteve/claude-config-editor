@@ -96,10 +96,10 @@ def setup_logging(
 class JsonFormatter(logging.Formatter):
     """
     JSON formatter for structured logging.
-    
+
     Outputs log records as JSON for easy parsing by log aggregators.
     """
-    
+
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON."""
         log_data = {
@@ -111,11 +111,11 @@ class JsonFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno,
         }
-        
+
         # Add exception info if present
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
-        
+
         # Add extra fields
         if hasattr(record, "request_id"):
             log_data["request_id"] = record.request_id
@@ -123,7 +123,7 @@ class JsonFormatter(logging.Formatter):
             log_data["user_id"] = record.user_id
         if hasattr(record, "duration_ms"):
             log_data["duration_ms"] = record.duration_ms
-        
+
         return json.dumps(log_data)
 
 
@@ -138,7 +138,7 @@ def setup_logging_advanced(
 ) -> None:
     """
     Advanced logging configuration with multiple handlers.
-    
+
     Args:
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_dir: Directory for log files
@@ -149,16 +149,16 @@ def setup_logging_advanced(
         separate_error_log: Create separate error log file
     """
     numeric_level = getattr(logging, log_level.upper(), logging.INFO)
-    
+
     # Create log directory
     log_path = Path(log_dir)
     log_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Get root logger
     logger = logging.getLogger()
     logger.setLevel(numeric_level)
     logger.handlers.clear()
-    
+
     # Choose formatter
     if use_json:
         formatter = JsonFormatter(datefmt="%Y-%m-%dT%H:%M:%S")
@@ -167,7 +167,7 @@ def setup_logging_advanced(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
-    
+
     # Console handler with Rich formatting
     if console_output:
         console = Console(stderr=True)
@@ -184,7 +184,7 @@ def setup_logging_advanced(
             logging.Formatter("%(message)s", datefmt="[%X]")
         )
         logger.addHandler(console_handler)
-    
+
     # Main application log file
     app_log = log_path / "app.log"
     app_handler = RotatingFileHandler(
@@ -196,7 +196,7 @@ def setup_logging_advanced(
     app_handler.setLevel(numeric_level)
     app_handler.setFormatter(formatter)
     logger.addHandler(app_handler)
-    
+
     # Separate error log file
     if separate_error_log:
         error_log = log_path / "error.log"
@@ -209,7 +209,7 @@ def setup_logging_advanced(
         error_handler.setLevel(logging.ERROR)
         error_handler.setFormatter(formatter)
         logger.addHandler(error_handler)
-    
+
     logger.info(
         f"Advanced logging configured: level={log_level}, dir={log_dir}, json={use_json}"
     )
@@ -231,10 +231,10 @@ def get_logger(name: str) -> logging.Logger:
 def log_function_call(logger: Optional[logging.Logger] = None) -> Callable:
     """
     Decorator to log function calls with arguments and execution time.
-    
+
     Args:
         logger: Logger to use (defaults to function's module logger)
-        
+
     Usage:
         @log_function_call()
         def my_function(arg1, arg2):
@@ -245,12 +245,12 @@ def log_function_call(logger: Optional[logging.Logger] = None) -> Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Get logger
             log = logger or logging.getLogger(func.__module__)
-            
+
             # Log function call
             log.debug(
                 f"Calling {func.__name__}(args={args!r}, kwargs={kwargs!r})"
             )
-            
+
             # Execute function and measure time
             start_time = time.time()
             try:
@@ -267,7 +267,7 @@ def log_function_call(logger: Optional[logging.Logger] = None) -> Callable:
                     exc_info=True,
                 )
                 raise
-        
+
         return wrapper
     return decorator
 
@@ -275,10 +275,10 @@ def log_function_call(logger: Optional[logging.Logger] = None) -> Callable:
 def log_async_function_call(logger: Optional[logging.Logger] = None) -> Callable:
     """
     Decorator to log async function calls with arguments and execution time.
-    
+
     Args:
         logger: Logger to use (defaults to function's module logger)
-        
+
     Usage:
         @log_async_function_call()
         async def my_async_function(arg1, arg2):
@@ -289,12 +289,12 @@ def log_async_function_call(logger: Optional[logging.Logger] = None) -> Callable
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Get logger
             log = logger or logging.getLogger(func.__module__)
-            
+
             # Log function call
             log.debug(
                 f"Calling async {func.__name__}(args={args!r}, kwargs={kwargs!r})"
             )
-            
+
             # Execute function and measure time
             start_time = time.time()
             try:
@@ -311,7 +311,7 @@ def log_async_function_call(logger: Optional[logging.Logger] = None) -> Callable
                     exc_info=True,
                 )
                 raise
-        
+
         return wrapper
     return decorator
 
@@ -324,21 +324,21 @@ def log_context(
 ):
     """
     Context manager for logging operations with timing.
-    
+
     Args:
         operation: Description of the operation
         logger: Logger to use (defaults to root logger)
         level: Log level to use
-        
+
     Usage:
         with log_context("database_query", logger=log):
             result = db.query()
     """
     log = logger or logging.getLogger()
-    
+
     log.log(level, f"Starting: {operation}")
     start_time = time.time()
-    
+
     try:
         yield
         duration_ms = (time.time() - start_time) * 1000
@@ -355,48 +355,48 @@ def log_context(
 class PerformanceLogger:
     """
     Performance logger for tracking operation times.
-    
+
     Usage:
         perf_logger = PerformanceLogger(logger)
         perf_logger.start("operation_name")
         # ... do work ...
         perf_logger.stop("operation_name")
     """
-    
+
     def __init__(self, logger: logging.Logger) -> None:
         """Initialize performance logger."""
         self.logger = logger
         self.timers: dict[str, float] = {}
-    
+
     def start(self, operation: str) -> None:
         """Start timing an operation."""
         self.timers[operation] = time.time()
         self.logger.debug(f"Performance tracking started: {operation}")
-    
+
     def stop(self, operation: str) -> float:
         """Stop timing an operation and log the duration."""
         if operation not in self.timers:
             self.logger.warning(f"No timer found for operation: {operation}")
             return 0.0
-        
+
         start_time = self.timers.pop(operation)
         duration_ms = (time.time() - start_time) * 1000
-        
+
         self.logger.info(
             f"Performance: {operation} completed in {duration_ms:.2f}ms"
         )
-        
+
         return duration_ms
-    
+
     def checkpoint(self, operation: str, checkpoint_name: str) -> None:
         """Log a checkpoint without stopping the timer."""
         if operation not in self.timers:
             self.logger.warning(f"No timer found for operation: {operation}")
             return
-        
+
         start_time = self.timers[operation]
         elapsed_ms = (time.time() - start_time) * 1000
-        
+
         self.logger.debug(
             f"Performance checkpoint: {operation}.{checkpoint_name} "
             f"at {elapsed_ms:.2f}ms"
