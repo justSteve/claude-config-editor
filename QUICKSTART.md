@@ -45,7 +45,7 @@ pip install -e .
 Capture the current state of all Claude configurations:
 
 ```bash
-python -m src.cli.commands snapshot create
+python -m src.cli.commands snapshot list
 ```
 
 With optional notes:
