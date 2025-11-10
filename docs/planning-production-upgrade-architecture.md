@@ -993,6 +993,77 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 - ✅ Comprehensive test suite created
 - ✅ API documentation and testing guides complete
 
+---
+
+## 📋 Consolidated Non-Completed Tasks (21 items)
+
+### **Phase 4: CLI Enhancement** (8 remaining tasks)
+
+| # | Task | Status | Priority | Est. Days |
+|---|------|--------|----------|-----------|
+| 1 | Enhanced database management commands (init, migrate, backup, restore, clean, verify) | ⏳ Not Started | Medium | 1.0 |
+| 2 | Add `serve` command for web API (--host, --port, --reload, etc.) | ⏳ Not Started | High | 0.5 |
+| 3 | Enhanced snapshot/scan commands (delete, tag, annotate, --categories, etc.) | ⏳ Not Started | Medium | 1.0 |
+| 4 | Help & examples (comprehensive help text, usage examples, command completion) | ⏳ Not Started | Low | 0.5 |
+| 5 | Logging commands (logs show, tail, clear with filtering) | ⏳ Not Started | Low | 0.5 |
+| 6 | CLI comprehensive tests (>80% coverage) | ⏳ Not Started | High | 2.0 |
+| 7 | Error handling & messages enhancement | ⏳ Not Started | Medium | 0.5 |
+| 8 | Export all/paths/changes commands | ⏳ Not Started | Low | 1.0 |
+
+**Subtotal Phase 4**: 8 tasks, ~7 days remaining
+
+### **Phase 5: API Enhancement** (6 remaining tasks)
+
+| # | Task | Status | Priority | Est. Days |
+|---|------|--------|----------|-----------|
+| 7 | Path endpoints (list, details, content, history) | ⏳ Not Started | **HIGH** | 2.0 |
+| 8 | Change tracking endpoints (compare, history, stats) | ⏳ Not Started | Medium | 2.0 |
+| 9 | MCP server endpoints + secret sanitization (NEW SECURITY FEATURE) | ⏳ Not Started | Medium | 2-3 |
+| 10 | Claude config endpoints | ⏳ Not Started | Medium | 1.5 |
+| 11 | Statistics endpoints (comprehensive) | ⏳ Not Started | Low | 1.0 |
+| 12 | Health and monitoring endpoints | ⏳ Not Started | Low | 1.0 |
+
+**Subtotal Phase 5**: 6 tasks, ~9.5 days remaining
+
+### **Phase 6: Testing & Documentation** (5 tasks)
+
+| # | Task | Status | Priority | Est. Days |
+|---|------|--------|----------|-----------|
+| 13 | Comprehensive unit tests (pytest, >80% coverage) | ⏳ Not Started | High | 2.0 |
+| 14 | Integration tests (API, CLI, database) | ⏳ Not Started | Medium | 1.5 |
+| 15 | Deployment guide (Windows-specific) | ⏳ Not Started | Medium | 1.0 |
+| 16 | Developer guide | ⏳ Not Started | Low | 1.0 |
+| 17 | User manual with screenshots | ⏳ Not Started | Medium | 1.5 |
+
+**Subtotal Phase 6**: 5 tasks, ~7 days remaining
+
+### **Phase 7: Deployment & DevOps** (3 tasks)
+
+| # | Task | Status | Priority | Est. Days |
+|---|------|--------|----------|-----------|
+| 18 | Windows service installer/configuration | ⏳ Not Started | Medium | 1.0 |
+| 19 | Windows deployment documentation | ⏳ Not Started | Medium | 1.0 |
+| 20 | Graceful shutdown handling | ⏳ Not Started | Low | 0.5 |
+
+**Subtotal Phase 7**: 3 tasks, ~2.5 days remaining
+
+---
+
+## 📊 Summary
+
+| Metric | Value |
+|--------|-------|
+| **Total Non-Completed Tasks** | 21 |
+| **Estimated Remaining Days** | ~26 days |
+| **Highest Priority** | Path endpoints (Phase 5.3) |
+| **By Phase** | Phase 4: 8 tasks \| Phase 5: 6 tasks \| Phase 6: 5 tasks \| Phase 7: 3 tasks |
+| **Current Progress** | ~47% complete (18.5 days spent) |
+| **Estimated Total Project** | ~44.5 days |
+
+**Status**: ✅ All listed tasks are correctly marked as **not-completed**. Most recent session fixed 4 critical CLI bugs and added security sanitization feature to Task #9.
+
+---
+
 ## Next Steps
 
 1. ~~**Clarify requirements**~~ ✅ **Done** (see "Questions to Answer - Decisions Made" section)
