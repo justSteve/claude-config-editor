@@ -42,13 +42,11 @@ def create_snapshot(
     notes: Optional[str] = typer.Option(
         None,
         "--notes",
-        "-n",
         help="Optional notes about this snapshot",
     ),
     tag: Optional[str] = typer.Option(
         None,
         "--tag",
-        "-t",
         help="Optional tag name for this snapshot",
     ),
     verbose: bool = typer.Option(
@@ -152,7 +150,8 @@ def list_snapshots(
                     console.print("\n[yellow]No snapshots found[/yellow]\n")
                     return
 
-                console.print(f"\n[bold cyan]Recent Snapshots[/bold cyan] (showing {len(snapshots)} of {limit})\n")
+                console.print(
+                    f"\n[bold cyan]Recent Snapshots[/bold cyan] (showing {len(snapshots)} of {limit})\n")
 
                 # Create and display table
                 table = create_snapshot_list_table(snapshots)
@@ -232,7 +231,8 @@ def show_snapshot(
                     result = await session.execute(stmt)
                     paths = result.scalars().all()
 
-                    console.print(f"\n[bold]Scanned Paths ({len(paths)}):[/bold]\n")
+                    console.print(
+                        f"\n[bold]Scanned Paths ({len(paths)}):[/bold]\n")
                     for path in paths[:20]:  # Limit to first 20
                         status = "✓" if path.exists else "✗"
                         console.print(
@@ -240,7 +240,8 @@ def show_snapshot(
                         )
 
                     if len(paths) > 20:
-                        console.print(f"\n  [dim]... and {len(paths) - 20} more[/dim]")
+                        console.print(
+                            f"\n  [dim]... and {len(paths) - 20} more[/dim]")
 
                 # Show changes if requested
                 if show_changes and snapshot.changed_from_previous:
@@ -250,7 +251,8 @@ def show_snapshot(
                     result = await session.execute(stmt)
                     changes = result.scalars().all()
 
-                    console.print(f"\n[bold]Changes ({len(changes)}):[/bold]\n")
+                    console.print(
+                        f"\n[bold]Changes ({len(changes)}):[/bold]\n")
                     for change in changes[:20]:  # Limit to first 20
                         color = {
                             "added": "green",
@@ -263,7 +265,8 @@ def show_snapshot(
                         )
 
                     if len(changes) > 20:
-                        console.print(f"\n  [dim]... and {len(changes) - 20} more[/dim]")
+                        console.print(
+                            f"\n  [dim]... and {len(changes) - 20} more[/dim]")
 
                 console.print()
 
@@ -331,7 +334,8 @@ def compare_snapshots(
                     previous = result.scalar_one_or_none()
 
                     if not previous:
-                        print_error("No previous snapshot found for comparison")
+                        print_error(
+                            "No previous snapshot found for comparison")
                         return
 
                 # Get changes
@@ -343,9 +347,12 @@ def compare_snapshots(
                 changes = result.scalars().all()
 
                 # Display comparison
-                console.print(f"\n[bold cyan]Comparing Snapshots[/bold cyan]\n")
-                console.print(f"[bold]Previous:[/bold] {previous.id} ({format_datetime(previous.snapshot_time)})")
-                console.print(f"[bold]Current:[/bold]  {current.id} ({format_datetime(current.snapshot_time)})")
+                console.print(
+                    f"\n[bold cyan]Comparing Snapshots[/bold cyan]\n")
+                console.print(
+                    f"[bold]Previous:[/bold] {previous.id} ({format_datetime(previous.snapshot_time)})")
+                console.print(
+                    f"[bold]Current:[/bold]  {current.id} ({format_datetime(current.snapshot_time)})")
                 console.print()
 
                 if not changes:
@@ -365,31 +372,38 @@ def compare_snapshots(
 
                 # Show changes
                 if added:
-                    console.print(f"[bold green]Added ({len(added)}):[/bold green]")
+                    console.print(
+                        f"[bold green]Added ({len(added)}):[/bold green]")
                     for change in added[:10]:
                         console.print(f"  + {change.path_template}")
                     if len(added) > 10:
-                        console.print(f"  [dim]... and {len(added) - 10} more[/dim]")
+                        console.print(
+                            f"  [dim]... and {len(added) - 10} more[/dim]")
                     console.print()
 
                 if modified:
-                    console.print(f"[bold yellow]Modified ({len(modified)}):[/bold yellow]")
+                    console.print(
+                        f"[bold yellow]Modified ({len(modified)}):[/bold yellow]")
                     for change in modified[:10]:
                         size_change = ""
                         if change.old_size_bytes and change.new_size_bytes:
                             delta = change.new_size_bytes - change.old_size_bytes
                             size_change = f" ({format_size(abs(delta))} {'+' if delta > 0 else '-'})"
-                        console.print(f"  * {change.path_template}{size_change}")
+                        console.print(
+                            f"  * {change.path_template}{size_change}")
                     if len(modified) > 10:
-                        console.print(f"  [dim]... and {len(modified) - 10} more[/dim]")
+                        console.print(
+                            f"  [dim]... and {len(modified) - 10} more[/dim]")
                     console.print()
 
                 if deleted:
-                    console.print(f"[bold red]Deleted ({len(deleted)}):[/bold red]")
+                    console.print(
+                        f"[bold red]Deleted ({len(deleted)}):[/bold red]")
                     for change in deleted[:10]:
                         console.print(f"  - {change.path_template}")
                     if len(deleted) > 10:
-                        console.print(f"  [dim]... and {len(deleted) - 10} more[/dim]")
+                        console.print(
+                            f"  [dim]... and {len(deleted) - 10} more[/dim]")
                     console.print()
 
         except Exception as e:
@@ -402,4 +416,3 @@ def compare_snapshots(
 
 if __name__ == "__main__":
     app()
-

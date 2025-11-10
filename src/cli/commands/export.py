@@ -35,13 +35,11 @@ def export_snapshot(
     output: Path = typer.Option(
         None,
         "--output",
-        "-o",
         help="Output file path (defaults to snapshot_<id>.<format>)",
     ),
     format: str = typer.Option(
         "json",
         "--format",
-        "-f",
         help="Export format: json, yaml, html, csv",
     ),
     include_content: bool = typer.Option(
@@ -52,7 +50,6 @@ def export_snapshot(
     compress: bool = typer.Option(
         False,
         "--compress",
-        "-c",
         help="Compress export file (gzip)",
     ),
     verbose: bool = typer.Option(
@@ -68,7 +65,8 @@ def export_snapshot(
     # Validate format
     valid_formats = ["json", "yaml", "html", "csv"]
     if format not in valid_formats:
-        print_error(f"Invalid format: {format}. Must be one of: {', '.join(valid_formats)}")
+        print_error(
+            f"Invalid format: {format}. Must be one of: {', '.join(valid_formats)}")
         return
 
     # Determine output file
@@ -100,7 +98,8 @@ def export_snapshot(
                 paths = result.scalars().all()
 
                 if verbose:
-                    console.print(f"\n[cyan]Exporting snapshot {snapshot_id}...[/cyan]")
+                    console.print(
+                        f"\n[cyan]Exporting snapshot {snapshot_id}...[/cyan]")
                     console.print(f"  Paths to export: {len(paths)}")
                     console.print(f"  Format: {format}")
                     console.print(f"  Output: {output}")
@@ -416,7 +415,8 @@ async def _export_csv(
                 "Yes" if path.exists else "No",
                 path.type or "",
                 path.size_bytes or "",
-                format_datetime(path.modified_time) if path.modified_time else "",
+                format_datetime(
+                    path.modified_time) if path.modified_time else "",
                 path.content_hash or "",
             ])
 
@@ -456,4 +456,3 @@ def export_config(
 
 if __name__ == "__main__":
     app()
-

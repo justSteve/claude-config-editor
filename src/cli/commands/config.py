@@ -30,7 +30,6 @@ def show_config(
     environment: Optional[str] = typer.Option(
         None,
         "--environment",
-        "-e",
         help="Environment to show (current if not specified)",
     ),
     verbose: bool = typer.Option(
@@ -97,7 +96,8 @@ def show_config(
 
 @app.command("get")
 def get_value(
-    key: str = typer.Argument(..., help="Configuration key to get (e.g., 'api.host')"),
+    key: str = typer.Argument(...,
+                              help="Configuration key to get (e.g., 'api.host')"),
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -129,7 +129,8 @@ def get_value(
 
 @app.command("set")
 def set_value(
-    key: str = typer.Argument(..., help="Configuration key to set (e.g., 'log_level')"),
+    key: str = typer.Argument(...,
+                              help="Configuration key to set (e.g., 'log_level')"),
     value: str = typer.Argument(..., help="Value to set"),
     persist: bool = typer.Option(
         True,
@@ -180,9 +181,11 @@ def set_value(
         )
 
         if persist:
-            console.print("\n[dim]Changes will be persisted to configuration file[/dim]\n")
+            console.print(
+                "\n[dim]Changes will be persisted to configuration file[/dim]\n")
         else:
-            console.print("\n[dim]Changes are temporary (current session only)[/dim]\n")
+            console.print(
+                "\n[dim]Changes are temporary (current session only)[/dim]\n")
 
     except Exception as e:
         handle_cli_error(e, verbose=verbose)
@@ -237,7 +240,8 @@ def validate_config(
             else:
                 print_error(
                     "Configuration validation failed",
-                    "\n".join(f"  • {error}" for error in result.get_error_messages())
+                    "\n".join(
+                        f"  • {error}" for error in result.get_error_messages())
                 )
 
         else:
@@ -265,7 +269,8 @@ def validate_config(
             else:
                 print_error(
                     "Current configuration has issues",
-                    "\n".join(f"  • {error}" for error in result.get_error_messages())
+                    "\n".join(
+                        f"  • {error}" for error in result.get_error_messages())
                 )
 
     except Exception as e:
@@ -291,7 +296,8 @@ def init_wizard(
 
     try:
         console.print("\n[bold cyan]Configuration Wizard[/bold cyan]\n")
-        console.print("Create a new configuration by answering a few questions.\n")
+        console.print(
+            "Create a new configuration by answering a few questions.\n")
 
         # Environment
         environment = typer.prompt(
@@ -381,4 +387,3 @@ def init_wizard(
 
 if __name__ == "__main__":
     app()
-

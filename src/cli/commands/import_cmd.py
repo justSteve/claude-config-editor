@@ -33,7 +33,6 @@ def import_snapshot(
     format: str = typer.Option(
         None,
         "--format",
-        "-f",
         help="Input format: json, yaml (auto-detected if not specified)",
     ),
     dry_run: bool = typer.Option(
