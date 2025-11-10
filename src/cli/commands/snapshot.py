@@ -83,18 +83,16 @@ def create_snapshot(
                     )
 
                 # Display results
+                console.print("\n")
                 console.print(
-                    "\n"
-                    + str(
-                        create_snapshot_panel(
-                            snapshot_id=snapshot.id,
-                            snapshot_hash=snapshot.snapshot_hash,
-                            snapshot_time=snapshot.snapshot_time,
-                            files_found=snapshot.files_found,
-                            directories_found=snapshot.directories_found,
-                            total_size_bytes=snapshot.total_size_bytes,
-                            changed_from_previous=snapshot.changed_from_previous,
-                        )
+                    create_snapshot_panel(
+                        snapshot_id=snapshot.id,
+                        snapshot_hash=snapshot.snapshot_hash,
+                        snapshot_time=snapshot.snapshot_time,
+                        files_found=snapshot.files_found,
+                        directories_found=snapshot.directories_found,
+                        total_size_bytes=snapshot.total_size_bytes,
+                        changed_from_previous=snapshot.changed_from_previous,
                     )
                 )
 
@@ -206,20 +204,18 @@ def show_snapshot(
                     return
 
                 # Display snapshot info
+                console.print("\n")
                 console.print(
-                    "\n"
-                    + str(
-                        create_snapshot_panel(
-                            snapshot_id=snapshot.id,
-                            snapshot_hash=snapshot.snapshot_hash,
-                            snapshot_time=snapshot.snapshot_time,
-                            files_found=snapshot.files_found,
-                            directories_found=snapshot.directories_found,
-                            total_size_bytes=snapshot.total_size_bytes,
-                            changed_from_previous=snapshot.changed_from_previous,
-                            title=f"Snapshot {snapshot_id}",
-                            border_style="cyan",
-                        )
+                    create_snapshot_panel(
+                        snapshot_id=snapshot.id,
+                        snapshot_hash=snapshot.snapshot_hash,
+                        snapshot_time=snapshot.snapshot_time,
+                        files_found=snapshot.files_found,
+                        directories_found=snapshot.directories_found,
+                        total_size_bytes=snapshot.total_size_bytes,
+                        changed_from_previous=snapshot.changed_from_previous,
+                        title=f"Snapshot {snapshot_id}",
+                        border_style="cyan",
                     )
                 )
 
