@@ -38,6 +38,19 @@ from src.core.schemas.paths import (
     FileContentResponse,
     McpServerResponse,
     ClaudeConfigResponse,
+    PathAnnotationResponse,
+    PathListResponse,
+)
+
+# Claude Config schemas
+from src.core.schemas.claude_config import (
+    ClaudeConfigSummary,
+    ClaudeConfigDetail,
+    ConfigDifferences,
+    ClaudeConfigComparison,
+    ConfigSummaryStats,
+    ClaudeConfigListResponse,
+    ClaudeConfigDetailResponse,
 )
 
 # Change schemas
@@ -111,6 +124,16 @@ __all__ = [
     "FileContentResponse",
     "McpServerResponse",
     "ClaudeConfigResponse",
+    "PathAnnotationResponse",
+    "PathListResponse",
+    # Claude Config
+    "ClaudeConfigSummary",
+    "ClaudeConfigDetail",
+    "ConfigDifferences",
+    "ClaudeConfigComparison",
+    "ConfigSummaryStats",
+    "ClaudeConfigListResponse",
+    "ClaudeConfigDetailResponse",
     # Changes
     "ChangeBase",
     "ChangeResponse",

@@ -27,6 +27,7 @@ from src.core.models import (
     SnapshotEnvVar,
     SnapshotPath,
     SnapshotChange,
+    ClaudeConfig,
 )
 from src.core.path_loader import load_path_definitions
 
@@ -319,6 +320,28 @@ class PathScanner:
                     annotation.snapshot_path_id = path_obj.id
                     self.session.add(annotation)
 
+        # Extract Claude config metadata for .claude.json files
+        for path_obj in scanned_paths:
+            if path_obj.exists and path_obj.type == "file":
+                path = Path(path_obj.resolved_path)
+                if path.name == ".claude.json":
+                    # Get content from FileContent
+                    if path_obj.content_id:
+                        stmt = select(FileContent).where(FileContent.id == path_obj.content_id)
+                        result = await self.session.execute(stmt)
+                        file_content = result.scalar_one_or_none()
+                        if file_content:
+                            # Get raw content bytes
+                            content = (
+                                file_content.content_text.encode("utf-8")
+                                if file_content.content_text
+                                else file_content.content_binary
+                            )
+                            if content:
+                                await self._extract_claude_config_metadata(
+                                    path_obj, content, path
+                                )
+
         # Detect changes from previous snapshot
         await self._detect_changes(snapshot)
 
@@ -451,6 +474,100 @@ class PathScanner:
         await self.session.flush()  # Get ID
 
         return file_content
+
+    async def _extract_claude_config_metadata(
+        self, snapshot_path: SnapshotPath, content: bytes, path: Path
+    ) -> None:
+        """
+        Extract metadata from .claude.json files and create ClaudeConfig record.
+
+        Args:
+            snapshot_path: The SnapshotPath object for this file
+            content: Raw file content
+            path: File path
+
+        Creates:
+            ClaudeConfig record linked to snapshot_path
+        """
+        try:
+            # Parse JSON content
+            text = content.decode("utf-8")
+            config_data = json.loads(text)
+
+            # Determine config type based on path
+            path_str = str(path).lower()
+            userprofile = os.path.expanduser("~").lower()
+
+            if "enterprise" in path_str or "programdata" in path_str:
+                config_type = "enterprise"
+            elif path.name == ".claude.json" and path_str.startswith(userprofile):
+                # User-level: ~/.claude.json or %USERPROFILE%\.claude.json
+                config_type = "desktop"
+            elif path.name == ".claude.json":
+                # Project-level: .claude.json in any other directory
+                config_type = "project"
+            else:
+                # Default to desktop for other .claude config files
+                config_type = "desktop"
+
+            # Extract counts
+            projects = config_data.get("projects", {})
+            num_projects = len(projects) if isinstance(projects, dict) else 0
+
+            # Count MCP servers (global + per-project)
+            global_mcp = config_data.get("mcpServers", {})
+            num_mcp_servers = len(global_mcp) if isinstance(global_mcp, dict) else 0
+
+            # Add project-level MCP servers
+            for proj_data in projects.values():
+                if isinstance(proj_data, dict):
+                    proj_mcp = proj_data.get("mcpServers", {})
+                    if isinstance(proj_mcp, dict):
+                        num_mcp_servers += len(proj_mcp)
+
+            # Count startups
+            num_startups = config_data.get("numStartups", 0)
+
+            # Find largest project by JSON size
+            largest_project_path = None
+            largest_project_size = 0
+
+            for proj_path, proj_data in projects.items():
+                if isinstance(proj_data, dict):
+                    # Estimate size by JSON string length
+                    proj_json = json.dumps(proj_data)
+                    proj_size = len(proj_json.encode("utf-8"))
+                    if proj_size > largest_project_size:
+                        largest_project_size = proj_size
+                        largest_project_path = proj_path
+
+            # Total size is the file size
+            total_size_bytes = len(content)
+
+            # Create ClaudeConfig record
+            claude_config = ClaudeConfig(
+                snapshot_path_id=snapshot_path.id,
+                config_type=config_type,
+                num_projects=num_projects,
+                num_mcp_servers=num_mcp_servers,
+                num_startups=num_startups,
+                total_size_bytes=total_size_bytes,
+                largest_project_path=largest_project_path,
+                largest_project_size=largest_project_size,
+            )
+
+            self.session.add(claude_config)
+            await self.session.flush()
+
+            logger.info(
+                f"Extracted Claude config metadata: {config_type}, "
+                f"{num_projects} projects, {num_mcp_servers} MCP servers"
+            )
+
+        except json.JSONDecodeError as e:
+            logger.warning(f"Failed to parse .claude.json at {path}: {e}")
+        except Exception as e:
+            logger.error(f"Error extracting Claude config metadata from {path}: {e}")
 
     async def _detect_changes(self, snapshot: Snapshot) -> None:
         """

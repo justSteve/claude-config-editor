@@ -13,7 +13,10 @@
       "Bash(sqlite3:*)",
       "Bash(git commit:*)",
       "Skill(superpowers:brainstorming)",
-      "Bash(start comprehensive_report.html)"
+      "Bash(start comprehensive_report.html)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)",
+      "Skill(superpowers:using-superpowers)",
+      "Skill(superpowers:executing-plans)"
     ],
     "deny": [],
     "ask": []

@@ -132,7 +132,7 @@ def create_app() -> FastAPI:
         }
 
     # Include routers
-    from src.api.routes import snapshots
+    from src.api.routes import snapshots, claude_config, paths
 
     app.include_router(
         snapshots.router,
@@ -140,9 +140,20 @@ def create_app() -> FastAPI:
         tags=["Snapshots"],
     )
 
+    app.include_router(
+        claude_config.router,
+        prefix="/api/v1",
+        tags=["Claude Config"],
+    )
+
+    app.include_router(
+        paths.router,
+        prefix="/api/v1",
+        tags=["Paths"],
+    )
+
     # TODO: Add more routers as they're implemented
-    # from src.api.routes import paths, changes
-    # app.include_router(paths.router, prefix="/api/v1", tags=["Paths"])
+    # from src.api.routes import changes
     # app.include_router(changes.router, prefix="/api/v1", tags=["Changes"])
 
     logger.info(f"FastAPI app created: {app.title}")
