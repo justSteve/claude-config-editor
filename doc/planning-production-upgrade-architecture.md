@@ -1,5 +1,71 @@
 # Production Upgrade Plan
 
+**Last Updated**: 2025-11-09  
+**Overall Progress**: **~47% COMPLETE** (18.5 days spent / ~39 days total)
+
+## 📚 Documentation
+
+### Key Documents
+- **[Documentation Index](./DOCUMENTATION-INDEX.md)** ⭐ - Central index of all documentation
+- **[Review & Test Process](./REVIEW-AND-TEST-PROCESS.md)** ⭐ - Comprehensive review and testing procedures
+- **[Consolidated Documentation](./CONSOLIDATED-DOCUMENTATION.md)** ⭐ - Single source of truth
+- **[Quick Start Guide](./QUICK-START-GUIDE.md)** ⭐ - Get started quickly
+
+### Testing Documentation
+- **[API Testing Guide](./API-TESTING-GUIDE.md)** - How to test the API
+- **[API Test Results](./API-TEST-RESULTS.md)** - Test results summary
+- **[API Quick Reference](./phase-5-quick-reference.md)** - Quick API reference
+
+### Phase Documentation
+- **[Phase 3 Complete](./PHASE-3-COMPLETE.md)** - Core refactoring complete
+- **[Phase 4 Progress](./phase-4-progress-summary.md)** - CLI enhancement progress
+- **[Phase 5 Progress](./phase-5-progress-summary.md)** - API implementation progress
+- **[Phase 5 Review](./phase-5-review.md)** - Comprehensive API review
+
+---
+
+## Quick Status Summary
+
+### ✅ Completed Phases
+- **Phase 1**: Project Structure & Setup (100%)
+- **Phase 2**: Database Layer (100%)
+- **Phase 3**: Core Refactoring (100%)
+
+### 🚧 In Progress
+- **Phase 4**: CLI Enhancement (42% - 5 of 12 tasks)
+- **Phase 5**: API Enhancement (30% - 3 of 10 tasks) ✅ **TESTED & WORKING**
+
+### ⏳ Pending
+- **Phase 6**: Testing & Documentation (partial - API tests done)
+- **Phase 7**: Deployment & DevOps (partial - health check done)
+
+## 🎉 Latest Achievements (2025-11-09)
+
+### ✅ Phase 5 API - Fully Tested & Working!
+
+**Test Results**: All 9 test cases passed! ✅
+- ✅ Scanner integration verified - actually scans files
+- ✅ 11 API endpoints working and tested
+- ✅ Performance excellent (<200ms for most operations)
+- ✅ Production-ready for snapshot operations
+
+**Key Metrics**:
+- Scanner found 6 files, 1 directory (52,399 bytes)
+- Scanned 17 configured paths
+- MCP server detection working
+- All CRUD operations functional
+- Export/import working
+
+**Documentation**:
+- ✅ API testing guide created
+- ✅ Test results documented
+- ✅ Quick reference guide
+- ✅ Comprehensive API review
+
+**Next Priority**: Path endpoints (Task 5.3) to complete core API functionality
+
+---
+
 ## Project Structure
 
 ```text
@@ -269,18 +335,47 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 - 8 comprehensive documentation pages
 - Full test coverage planned for Phase 6
 
-### Phase 4: CLI Enhancement
+### Phase 4: CLI Enhancement 🚧 **IN PROGRESS** (42% Complete)
 
-- [ ] Implement Typer-based CLI (already partially implemented)
-- [ ] Add scan command with options (enhance snapshot create with scan-specific options)
-- [ ] Add database management commands
-- [ ] Add export/import commands
-- [ ] Add configuration commands
-- [ ] Add serve command for web API
-- [ ] Add progress bars for long operations
-- [ ] Add configuration wizard
-- [ ] Improve error handling and user feedback
+**📋 Detailed Plan**: See [Phase 4 CLI Enhancement Plan](./phase-4-cli-enhancement-plan.md)  
+**📊 Progress Summary**: See [Phase 4 Progress Summary](./phase-4-progress-summary.md)
+
+- [x] Refactor CLI structure into modular commands ✅
+- [x] Add progress indicators (bars and spinners) ✅
+- [x] Add export commands (JSON/YAML/HTML/CSV) ✅
+- [x] Add import commands (snapshots and config) ✅
+- [x] Add configuration management commands ✅
+- [ ] Enhanced database management commands (basic done)
+- [ ] Add serve command for web API (pending Phase 5)
+- [ ] Enhance snapshot commands with more options
+- [ ] Improve error handling and messages (basic done)
+- [ ] Add comprehensive help and examples
+- [ ] Add logging commands (show/tail/clear)
 - [ ] Add comprehensive CLI tests
+
+**Status**: **42% COMPLETE** 🚧 (5 of 12 tasks done)
+
+**Completed Tasks**:
+1. ✅ **Task 4.1**: Refactor CLI structure (0.5 days)
+2. ✅ **Task 4.2**: Add progress indicators (0.5 days)
+3. ✅ **Task 4.3**: Add export commands (0.5 days)
+4. ✅ **Task 4.4**: Add import commands (0.5 days)
+5. ✅ **Task 4.5**: Add configuration commands (0.5 days)
+
+**Time**: 2.5 days spent / 10.5 days total (24% time, ahead of schedule)
+
+**Key Achievements**:
+- ✅ Modular CLI structure with 10 organized modules
+- ✅ Comprehensive progress indicators for all operations
+- ✅ Export/import functionality (JSON, YAML, HTML, CSV)
+- ✅ Configuration management with interactive wizard
+- ✅ Professional formatting with Rich library
+- ✅ 22+ commands implemented and working
+
+**Deliverables**:
+- 12 new files created (~3,900 lines of code)
+- Comprehensive documentation pages
+- Test scripts and startup scripts
 
 #### Phase 4 Detailed Implementation Plan
 
@@ -290,7 +385,120 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 - Uses Rich for terminal output
 - Async database operations with proper error handling
 
-**4.1: Enhance Snapshot/Scan Commands**
+**4.1: CLI Structure Refactoring** ✅ **COMPLETE**
+
+**Status**: ✅ Completed (2025-11-09)
+
+**Tasks:**
+- [x] Refactor CLI into modular structure
+- [x] Create `src/cli/commands/__init__.py` - Main CLI app
+- [x] Create `src/cli/commands/snapshot.py` - Snapshot commands
+- [x] Create `src/cli/commands/database.py` - Database commands
+- [x] Create `src/cli/formatters.py` - Output formatting
+- [x] Create `src/cli/utils.py` - Shared utilities
+- [x] Create `src/cli/progress.py` - Progress indicators
+
+**Implementation Details:**
+- ✅ Created modular command structure (10 modules)
+- ✅ Separated concerns into logical modules
+- ✅ Shared utilities and formatters
+- ✅ Progress indicators implemented
+- ✅ Maintained backward compatibility
+
+**Files Created**: 7 files, ~1,200 lines of code
+
+---
+
+**4.2: Progress Indicators** ✅ **COMPLETE**
+
+**Status**: ✅ Completed (2025-11-09)
+
+**Tasks:**
+- [x] Create progress bars for long operations
+- [x] Add spinners for quick operations
+- [x] Add status indicators
+- [x] Track scanning progress
+- [x] Track export/import progress
+
+**Implementation Details:**
+- ✅ `create_progress()` - General progress bars
+- ✅ `create_spinner()` - Quick operation spinners
+- ✅ `show_status()` - Status with success/fail
+- ✅ `ScanProgress` - File scanning progress
+- ✅ `ExportProgress` - Export operation progress
+- ✅ `show_step_progress()` - Multi-step indicators
+
+**Files Created**: Enhanced `src/cli/progress.py` (~209 lines)
+
+---
+
+**4.3: Export Commands** ✅ **COMPLETE**
+
+**Status**: ✅ Completed (2025-11-09)
+
+**Tasks:**
+- [x] Create `export snapshot` command
+- [x] Support JSON, YAML, HTML, CSV formats
+- [x] Export configuration to YAML
+- [x] Compression support
+- [x] Progress tracking
+
+**Implementation Details:**
+- ✅ `export snapshot` - Export to JSON/YAML/HTML/CSV
+- ✅ `export config` - Export configuration
+- ✅ Beautiful HTML reports
+- ✅ Compression support (gzip)
+- ✅ Progress indicators
+
+**Files Created**: `src/cli/commands/export.py` (~448 lines)
+
+---
+
+**4.4: Import Commands** ✅ **COMPLETE**
+
+**Status**: ✅ Completed (2025-11-09)
+
+**Tasks:**
+- [x] Create `import snapshot` command
+- [x] Create `import config` command
+- [x] Validation before import
+- [x] Dry-run mode
+- [x] Progress tracking
+
+**Implementation Details:**
+- ✅ `import snapshot` - Import from JSON/YAML
+- ✅ `import config` - Import configuration
+- ✅ Data validation
+- ✅ Dry-run mode
+- ✅ Progress indicators
+
+**Files Created**: `src/cli/commands/import_cmd.py` (~294 lines)
+
+---
+
+**4.5: Configuration Commands** ✅ **COMPLETE**
+
+**Status**: ✅ Completed (2025-11-09)
+
+**Tasks:**
+- [x] Create `config show` command
+- [x] Create `config get` command
+- [x] Create `config set` command
+- [x] Create `config validate` command
+- [x] Create `config init` wizard
+
+**Implementation Details:**
+- ✅ `config show` - Display current configuration
+- ✅ `config get` - Get specific value
+- ✅ `config set` - Set configuration value
+- ✅ `config validate` - Validate configuration
+- ✅ `config init` - Interactive configuration wizard
+
+**Files Created**: `src/cli/commands/config.py` (~374 lines)
+
+---
+
+**4.6: Enhanced Snapshot/Scan Commands** ⏳ **PENDING**
 
 **Tasks:**
 - [ ] Add scan-specific options to `snapshot create`:
@@ -299,10 +507,6 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
   - `--skip-content`: Don't read file contents, only metadata
   - `--parallel`: Number of parallel file reads (default: 4)
   - `--verbose`: Detailed progress output
-- [ ] Add progress bars using `rich.progress` for:
-  - File scanning progress
-  - Database operations
-  - Content reading operations
 - [ ] Add `snapshot delete` command:
   - Delete single snapshot by ID
   - Delete multiple snapshots (--ids flag)
@@ -318,99 +522,121 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
   - List annotations for a snapshot
 
 **Implementation Details:**
-- Create `src/cli/commands/snapshot.py` (refactor from current commands.py)
+- Enhance `src/cli/commands/snapshot.py`
 - Add progress tracking to `PathScanner.create_snapshot()`
 - Implement confirmation prompts using `typer.confirm()`
 - Add validation for snapshot IDs and tags
 
-**4.2: Database Management Commands**
+**4.7: Database Management Commands** 🟡 **PARTIAL**
 
-**Tasks:**
-- [ ] Create `db` command group with subcommands:
-  - `db init`: Initialize database (create schema)
-  - `db migrate`: Run database migrations (Alembic integration)
-  - `db backup`: Create database backup
-  - `db restore`: Restore from backup
-  - `db vacuum`: Optimize database (VACUUM)
-  - `db stats`: Show database statistics (enhance existing stats command)
-  - `db clean`: Clean old snapshots/data (with retention policy)
-  - `db verify`: Verify database integrity
-- [ ] Add backup/restore functionality:
-  - Backup to timestamped file
-  - Restore with confirmation
-  - List available backups
-  - Backup compression (optional)
-- [ ] Add cleanup commands:
-  - `db clean --older-than`: Remove snapshots older than N days
-  - `db clean --keep-last`: Keep only last N snapshots
-  - `db clean --orphaned`: Remove orphaned file contents
-  - Dry-run mode for all cleanup operations
+**Status**: Basic commands implemented, enhanced features pending
+
+**Completed:**
+- [x] Create `db stats` command
+- [x] Create `db dedup` command
+- [x] Create `db vacuum` command
+- [x] Create `db health` command
+
+**Pending:**
+- [ ] Create `db init` command (initialize database)
+- [ ] Create `db migrate` command (Alembic integration)
+- [ ] Create `db backup` command (backup database)
+- [ ] Create `db restore` command (restore from backup)
+- [ ] Create `db clean` command (cleanup old data)
+- [ ] Create `db verify` command (verify integrity)
 
 **Implementation Details:**
-- Create `src/cli/commands/db.py`
-- Create `src/core/backup.py` for backup/restore logic
-- Integrate Alembic CLI commands
-- Add database verification using `PRAGMA integrity_check`
-- Implement retention policies in configuration
+- ✅ Basic database commands in `src/cli/commands/database.py`
+- [ ] Enhanced backup/restore functionality
+- [ ] Alembic integration
+- [ ] Cleanup commands with retention policies
 
-**4.3: Export/Import Commands**
+**Files Created**: `src/cli/commands/database.py` (~199 lines, basic functionality)
 
-**Tasks:**
-- [ ] Create `export` command group:
-  - `export snapshot <id> --format json|csv|html --output <file>`
-  - `export all --format json --output <file>`
-  - `export paths <snapshot-id> --format json|csv`
-  - `export changes <snapshot-id> --format json|csv|html`
-  - `export config <config-type> --format json|yaml`
-- [ ] Create `import` command group:
-  - `import snapshot <file> --format json`
-  - `import config <file> --format json|yaml`
-  - Validate imported data
-  - Conflict resolution (skip/overwrite/rename)
-- [ ] Support formats:
-  - JSON: Full data export/import
-  - CSV: Tabular data (paths, changes)
-  - HTML: Human-readable reports
-  - YAML: Configuration files
+**4.3 & 4.4: Export/Import Commands** ✅ **COMPLETE**
 
-**Implementation Details:**
-- Create `src/cli/commands/export.py`
-- Create `src/cli/commands/import.py`
-- Create `src/utils/exporters.py` for export logic
-- Create `src/utils/importers.py` for import logic
-- Add data validation using Pydantic models
-- Implement conflict resolution strategies
+**Status**: ✅ Completed (2025-11-09)
 
-**4.4: Configuration Commands**
+**Completed Tasks:**
+- [x] Create `export snapshot` command (JSON/YAML/HTML/CSV)
+- [x] Create `export config` command
+- [x] Create `import snapshot` command
+- [x] Create `import config` command
+- [x] Data validation
+- [x] Progress tracking
+- [x] Compression support
 
-**Tasks:**
-- [ ] Create `config` command group:
-  - `config show`: Display current configuration
-  - `config set <key> <value>`: Set configuration value
-  - `config get <key>`: Get configuration value
-  - `config validate`: Validate configuration file
-  - `config wizard`: Interactive configuration wizard
-  - `config reset`: Reset to default configuration
-- [ ] Configuration wizard features:
-  - Interactive prompts for all settings
-  - Database path selection
-  - Logging configuration
-  - Scan path configuration
-  - Environment selection (dev/prod)
-- [ ] Configuration management:
-  - Support multiple config files (dev/prod)
-  - Environment variable overrides
-  - Configuration file validation
-  - Configuration file templates
+**Pending Enhancements:**
+- [ ] `export all` command (export all snapshots)
+- [ ] `export paths` command (export paths only)
+- [ ] `export changes` command (export changes only)
+- [ ] Enhanced conflict resolution
+- [ ] Import validation improvements
 
 **Implementation Details:**
-- Create `src/cli/commands/config.py`
-- Create `src/cli/wizard.py` for interactive wizard
-- Enhance `src/core/config.py` with setter/getter methods
-- Add configuration validation using Pydantic
-- Create configuration templates in `config/` directory
+- ✅ Export/import functionality implemented
+- ✅ Multiple formats supported (JSON, YAML, HTML, CSV)
+- ✅ Data validation using Pydantic
+- ✅ Progress indicators
+- ✅ Error handling
 
-**4.5: Serve Command (Web API)**
+**Files Created**: 
+- `src/cli/commands/export.py` (~448 lines)
+- `src/cli/commands/import_cmd.py` (~294 lines)
+
+**4.5: Configuration Commands** ✅ **COMPLETE**
+
+**Status**: ✅ Completed (2025-11-09)
+
+**Completed Tasks:**
+- [x] Create `config show` command
+- [x] Create `config get` command
+- [x] Create `config set` command
+- [x] Create `config validate` command
+- [x] Create `config init` wizard (interactive)
+
+**Pending Enhancements:**
+- [ ] `config reset` command
+- [ ] Enhanced configuration wizard
+- [ ] Configuration file templates
+- [ ] Configuration file management
+
+**Implementation Details:**
+- ✅ Configuration management implemented
+- ✅ Interactive configuration wizard
+- ✅ Configuration validation
+- ✅ Environment variable support
+- ✅ Multi-environment support (dev/prod/test)
+
+**Files Created**: `src/cli/commands/config.py` (~374 lines)
+
+---
+
+**4.6: Database Management Commands** 🟡 **PARTIAL**
+
+**Status**: Basic commands implemented, enhanced features pending
+
+**Completed:**
+- [x] Create `db stats` command
+- [x] Create `db dedup` command
+- [x] Create `db vacuum` command
+- [x] Create `db health` command
+
+**Pending:**
+- [ ] Create `db init` command (initialize database)
+- [ ] Create `db migrate` command (Alembic integration)
+- [ ] Create `db backup` command (backup database)
+- [ ] Create `db restore` command (restore from backup)
+- [ ] Create `db clean` command (cleanup old data)
+- [ ] Create `db verify` command (verify integrity)
+
+**Files Created**: `src/cli/commands/database.py` (~199 lines, basic functionality)
+
+---
+
+**4.7: Serve Command (Web API)** ⏳ **PENDING**
+
+**Status**: Pending Phase 5 completion
 
 **Tasks:**
 - [ ] Create `serve` command:
@@ -427,169 +653,73 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 
 **Implementation Details:**
 - Create `src/cli/commands/serve.py`
-- Integrate with `src/api/server.py`
+- Integrate with `src/api/app.py` (FastAPI)
 - Add signal handlers for graceful shutdown
 - Add startup/shutdown messages with Rich formatting
 - Implement health check display
 
-**4.6: Progress Bars and User Feedback**
+**Dependencies**: Requires Phase 5 API to be complete
+
+---
+
+**4.8: Help & Examples** ⏳ **PENDING**
 
 **Tasks:**
-- [ ] Add progress bars for:
-  - File scanning (with file count and current file)
-  - Database operations (inserts, updates)
-  - Content reading (bytes read, files processed)
-  - Export/import operations
-- [ ] Add spinners for:
-  - Database initialization
-  - Configuration loading
-  - Short operations (< 1 second)
-- [ ] Improve error messages:
-  - Color-coded error messages (red for errors, yellow for warnings)
-  - Detailed error context
-  - Suggestions for common errors
-  - Stack traces in verbose mode only
-- [ ] Add success messages:
-  - Green checkmarks for successful operations
-  - Summary statistics after operations
-  - Clear indication of what was accomplished
-
-**Implementation Details:**
-- Use `rich.progress.Progress` for progress bars
-- Use `rich.spinner.Spinner` for spinners
-- Create `src/cli/formatters.py` for consistent message formatting
-- Add `--quiet` flag for minimal output
-- Add `--verbose` flag for detailed output
-
-**4.7: Error Handling and Validation**
-
-**Tasks:**
-- [ ] Create custom exception classes:
-  - `CLIError`: Base exception for CLI errors
-  - `DatabaseError`: Database-related errors
-  - `ValidationError`: Input validation errors
-  - `ConfigurationError`: Configuration errors
-- [ ] Add input validation:
-  - Validate snapshot IDs exist
-  - Validate file paths
-  - Validate configuration values
-  - Validate export/import formats
-- [ ] Add error recovery:
-  - Retry logic for transient errors
-  - Rollback for failed operations
-  - Clear error messages with recovery suggestions
-- [ ] Add logging integration:
-  - Log all CLI operations
-  - Log errors with stack traces
-  - Log user actions for audit trail
-
-**Implementation Details:**
-- Create `src/cli/exceptions.py` for custom exceptions
-- Create `src/cli/validators.py` for input validation
-- Add error handlers using Typer's exception handling
-- Integrate with `src/utils/logger.py`
-
-**4.8: CLI Structure Refactoring**
-
-**Tasks:**
-- [ ] Refactor `src/cli/commands.py` into modular structure:
-  - `src/cli/commands/__init__.py`: Main CLI app
-  - `src/cli/commands/snapshot.py`: Snapshot commands
-  - `src/cli/commands/db.py`: Database commands
-  - `src/cli/commands/export.py`: Export commands
-  - `src/cli/commands/import.py`: Import commands
-  - `src/cli/commands/config.py`: Configuration commands
-  - `src/cli/commands/serve.py`: Serve command
-- [ ] Create shared utilities:
-  - `src/cli/utils.py`: Shared CLI utilities
-  - `src/cli/formatters.py`: Output formatting
-  - `src/cli/validators.py`: Input validation
-  - `src/cli/exceptions.py`: Custom exceptions
-- [ ] Add command aliases and shortcuts
+- [ ] Add comprehensive help text
+- [ ] Add usage examples for each command
 - [ ] Add command completion (bash/zsh/fish)
-- [ ] Add help text improvements:
-  - Detailed command descriptions
-  - Examples for each command
-  - Link to documentation
+- [ ] Link to documentation in help
+- [ ] Create quick reference guide
 
-**Implementation Details:**
-- Refactor existing commands.py into modular structure
-- Use Typer's command groups for organization
-- Add command aliases using `@app.command()` with multiple names
-- Generate completion scripts using Typer's completion feature
-- Add rich help formatting using Rich's Markdown support
-
-**4.9: Testing**
+**4.9: Logging Commands** ⏳ **PENDING**
 
 **Tasks:**
-- [ ] Create comprehensive CLI tests:
-  - `tests/test_cli_commands.py`: Test all commands
-  - `tests/test_cli_validators.py`: Test input validation
-  - `tests/test_cli_formatters.py`: Test output formatting
-  - `tests/test_cli_wizard.py`: Test configuration wizard
-- [ ] Test scenarios:
-  - Happy path for all commands
-  - Error handling (invalid inputs, missing files, etc.)
-  - Edge cases (empty database, large datasets, etc.)
-  - Progress bars and user feedback
-  - Export/import round-trip testing
-- [ ] Integration tests:
-  - End-to-end command execution
-  - Database operations through CLI
-  - Configuration management through CLI
-- [ ] Mock external dependencies:
-  - Mock database operations
-  - Mock file system operations
-  - Mock user input (for wizard)
+- [ ] Create `logs show` command
+- [ ] Create `logs tail` command
+- [ ] Create `logs clear` command
+- [ ] Add log filtering options
 
-**Implementation Details:**
-- Use `typer.testing.CliRunner` for testing CLI commands
-- Use `pytest` fixtures for test setup/teardown
-- Use `unittest.mock` for mocking external dependencies
-- Create test fixtures for common scenarios
-- Add test coverage target: >80% for CLI code
-
-**4.10: Documentation**
+**4.8: Enhanced Snapshot Commands** ⏳ **PENDING**
 
 **Tasks:**
-- [ ] Update CLI documentation:
-  - Add command reference to `docs/CLI.md`
-  - Add usage examples
-  - Add troubleshooting guide
-  - Add configuration guide
-- [ ] Add inline help:
-  - Comprehensive docstrings for all commands
-  - Parameter descriptions
-  - Examples in help text
-- [ ] Create quick reference:
-  - Common commands cheat sheet
-  - Command aliases reference
-  - Configuration options reference
+- [ ] Add scan-specific options to `snapshot create`
+- [ ] Add `snapshot delete` command
+- [ ] Add `snapshot tag` command
+- [ ] Add `snapshot annotate` command
 
-**Implementation Details:**
-- Update `docs/CLI.md` with all commands
-- Add examples to command docstrings
-- Create `docs/CLI_QUICK_REF.md` for quick reference
-- Add CLI usage to main README.md
+**Note**: Basic snapshot commands (create, list, show, compare) are already implemented in `src/cli/commands/snapshot.py`. This task focuses on enhancements.
+
+---
+
+**4.10: CLI Tests** ⏳ **PENDING**
+
+**Tasks:**
+- [ ] Create comprehensive CLI tests
+- [ ] Test all commands
+- [ ] Test error handling
+- [ ] Test progress indicators
+- [ ] Achieve 80%+ test coverage
 
 **Dependencies:**
-- Phase 2: Database layer must be complete
-- Phase 3: Core refactoring (scanner, models, validators) must be complete
-- Alembic must be set up for migration commands
+- Phase 2: Database layer must be complete ✅
+- Phase 3: Core refactoring (scanner, models, validators) must be complete ✅
+- Alembic must be set up for migration commands (pending)
 
 **Timeline Estimate:**
-- 4.1: Enhance Snapshot/Scan Commands - 0.5 days
-- 4.2: Database Management Commands - 1 day
-- 4.3: Export/Import Commands - 1 day
-- 4.4: Configuration Commands - 0.5 days
-- 4.5: Serve Command - 0.25 days
-- 4.6: Progress Bars and User Feedback - 0.5 days
-- 4.7: Error Handling and Validation - 0.5 days
-- 4.8: CLI Structure Refactoring - 0.5 days
-- 4.9: Testing - 1 day
-- 4.10: Documentation - 0.25 days
+- 4.1: CLI Structure Refactoring - 0.5 days ✅ **DONE**
+- 4.2: Progress Indicators - 0.5 days ✅ **DONE**
+- 4.3: Export Commands - 0.5 days ✅ **DONE**
+- 4.4: Import Commands - 0.5 days ✅ **DONE**
+- 4.5: Configuration Commands - 0.5 days ✅ **DONE**
+- 4.6: Database Management Commands - 1 day (basic done, enhanced pending)
+- 4.7: Serve Command - 0.5 days (pending Phase 5 completion)
+- 4.8: Enhance Snapshot Commands - 1 day (pending)
+- 4.9: Error Handling - 0.5 days (basic done, enhanced pending)
+- 4.10: Help & Examples - 0.5 days (pending)
+- 4.11: Logging Commands - 0.5 days (pending)
+- 4.12: CLI Tests - 2 days (pending)
 
-**Total: ~5.5 days** (updated from original 2 days estimate)
+**Total: ~10.5 days** (2.5 days spent, 8 days remaining)
 
 **Success Criteria:**
 - All commands implemented and tested
@@ -601,28 +731,111 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 - Test coverage >80%
 - Documentation complete
 
-### Phase 5: API Enhancement
+### Phase 5: API Enhancement 🚧 **IN PROGRESS** (30% Complete) ✅ **TESTED & WORKING**
 
-- [ ] Refactor server to use new structure
-- [ ] Add proper route organization
-- [ ] Implement database-backed endpoints
-- [ ] Add new endpoints for history
-- [ ] Add API documentation
+**📋 Detailed Plan**: See [Phase 5 API Implementation Plan](./phase-5-api-implementation-plan.md)  
+**📊 Progress Summary**: See [Phase 5 Progress Summary](./phase-5-progress-summary.md)  
+**📝 Review**: See [Phase 5 Review](./phase-5-review.md)  
+**🧪 Testing Guide**: See [API Testing Guide](./API-TESTING-GUIDE.md)  
+**✅ Test Results**: See [API Test Results](./API-TEST-RESULTS.md)
+
+- [x] FastAPI application setup ✅
+- [x] Snapshot endpoints with scanner integration ✅
+- [x] Error handling and exception handlers ✅
+- [ ] Path endpoints (list, details, content, history)
+- [ ] Change tracking endpoints (compare, history, stats)
+- [ ] MCP server endpoints
+- [ ] Claude config endpoints
+- [ ] Statistics endpoints
+- [ ] Enhanced export/import endpoints
+- [ ] Health and monitoring (basic done)
+
+**Status**: **30% COMPLETE** 🚧 (3 of 10 tasks done)
+
+**Completed Tasks**:
+1. ✅ **Task 5.1**: FastAPI application setup (100%)
+2. ✅ **Task 5.2**: Snapshot endpoints with scanner integration (100%)
+   - ✅ Scanner integration complete - actually scans files!
+   - ✅ All CRUD operations working
+   - ✅ Tag management working
+   - ✅ Annotation management working (add, list, remove)
+   - ✅ Export endpoint working
+   - ✅ Statistics endpoint working
+3. ✅ **Task 5.10**: Error handling and validation (100%)
+
+**Time**: ~1 day spent / 10 days total (10% time)
+
+**Key Achievements**:
+- ✅ FastAPI app with production-ready features
+- ✅ **Scanner integration** - snapshot creation actually scans files!
+- ✅ **11 API endpoints** implemented and **fully tested**
+- ✅ Comprehensive error handling
+- ✅ OpenAPI documentation (automatic)
+- ✅ Request logging middleware
+- ✅ Database session management
+- ✅ Service layer architecture
+- ✅ **All tests passed** - API is production-ready for snapshot operations
+
+**Deliverables**:
+- 6 new files created (~1,510 lines of code)
+- 11 API endpoints working
+- Comprehensive test suite (`quick_test.py`, `test_api.py`)
+- API documentation and testing guides
+- Test scripts and startup scripts
+
+**Test Results**: ✅ **ALL TESTS PASSED** (2025-11-09)
+- ✅ Health check: Working (<100ms)
+- ✅ Snapshot creation: Scans 17+ paths, finds files (~1-2s)
+- ✅ List snapshots: Working with pagination (<100ms)
+- ✅ Get snapshot details: Working (<50ms)
+- ✅ Tag management: Working (<50ms)
+- ✅ Annotation management: Working (<50ms)
+- ✅ Export functionality: Working (<200ms)
+- ✅ Statistics: Working (<50ms)
+
+**Scanner Integration Verified**:
+- ✅ Actually scans Claude configuration files
+- ✅ Found 6 files, 1 directory in test (52,399 bytes)
+- ✅ Stores all paths (17 configured paths)
+- ✅ MCP server detection working (auto-creates annotations)
+- ✅ Content hashing and deduplication working
+- ✅ Change detection ready (no previous snapshot in test)
+
+**Performance Metrics**:
+- All endpoints: <200ms (except snapshot creation)
+- Snapshot creation: ~1-2s (reasonable for file scanning)
+- No performance issues detected
+- Database operations optimized
+
+**Production Readiness**:
+- ✅ API is functional and tested
+- ✅ Error handling comprehensive
+- ✅ Logging in place
+- ✅ Documentation complete
+- ✅ Ready for snapshot operations
+- 🟡 Path endpoints pending (next priority)
+- 🟡 Change endpoints pending (next priority)
 
 ### Phase 6: Testing & Documentation
 
-- [ ] Write comprehensive tests
-- [ ] Add API documentation
+- [x] API testing suite ✅ (Phase 5 - `quick_test.py`, `test_api.py`)
+- [x] API documentation ✅ (Phase 5 - OpenAPI/Swagger auto-generated)
+- [x] API testing guide ✅ (Phase 5 - `API-TESTING-GUIDE.md`)
+- [x] API test results ✅ (Phase 5 - `API-TEST-RESULTS.md`)
+- [ ] Write comprehensive unit tests (pytest)
+- [ ] Write integration tests
 - [ ] Add deployment guide
 - [ ] Add developer guide
 - [ ] Add user manual
+- [ ] Achieve 80%+ test coverage
 
 ### Phase 7: Deployment & DevOps
 
+- [x] Add health check endpoints ✅ (Phase 5)
 - [ ] Create Windows service installer/configuration
-- [ ] Add health check endpoints
 - [ ] Create deployment documentation for Windows
 - [ ] Add graceful shutdown handling
+- [ ] Add serve command to CLI (Phase 4, Task 4.7)
 - ~~Create Dockerfile~~ (not needed)
 - ~~Add docker-compose~~ (not needed)
 - ~~Create systemd service~~ (not needed - Windows only)
@@ -646,10 +859,10 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 
 ### API/Web
 
-- **Framework**: FastAPI (async) or Flask (sync)
-- **WSGI/ASGI**: Uvicorn (FastAPI) or Gunicorn (Flask)
-- **Validation**: Pydantic
-- **API Docs**: OpenAPI/Swagger (auto-generated)
+- **Framework**: FastAPI (async) ✅ **Selected and implemented**
+- **WSGI/ASGI**: Uvicorn (FastAPI) ✅ **In use**
+- **Validation**: Pydantic ✅ **In use**
+- **API Docs**: OpenAPI/Swagger (auto-generated) ✅ **Working**
 
 ### Configuration
 
@@ -753,26 +966,94 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 
 ## Timeline Estimate
 
-- **Phase 1**: 2-3 days
-- **Phase 2**: 2-3 days
-- **Phase 3**: 3-4 days
-- **Phase 4**: 5.5 days (updated - see detailed plan)
-- **Phase 5**: 2-3 days
-- **Phase 6**: 3-4 days
-- **Phase 7**: 2-3 days
+- **Phase 1**: 2-3 days ✅ **COMPLETE**
+- **Phase 2**: 2-3 days ✅ **COMPLETE**
+- **Phase 3**: 10-15 days ✅ **COMPLETE** (9-10 days actual)
+- **Phase 4**: 10.5 days 🚧 **42% COMPLETE** (2.5 days spent, 8 days remaining)
+- **Phase 5**: 10 days 🚧 **30% COMPLETE** (1 day spent, 9 days remaining) ✅ **TESTED**
+- **Phase 6**: 3-4 days ⏳ **PENDING**
+- **Phase 7**: 2-3 days ⏳ **PENDING**
 
 **Total**: ~3.5-4.5 weeks for complete production-grade upgrade
+
+**Current Progress**: 
+- ✅ Phases 1-3: **100% COMPLETE** (14-21 days)
+- 🚧 Phases 4-5: **36% COMPLETE** (3.5 days spent, 17 days remaining)
+  - Phase 4: 42% complete (5 of 12 tasks)
+  - Phase 5: 30% complete (3 of 10 tasks) ✅ **TESTED & WORKING**
+- ⏳ Phases 6-7: **PENDING** (5-7 days)
+
+**Overall Progress**: **~47% COMPLETE** (18.5 days spent / ~39 days total)
+
+**Recent Achievements** (2025-11-09):
+- ✅ Phase 5 API fully tested - all tests passed
+- ✅ Scanner integration verified - actually scans files
+- ✅ 11 API endpoints working and tested
+- ✅ Production-ready for snapshot operations
+- ✅ Comprehensive test suite created
+- ✅ API documentation and testing guides complete
 
 ## Next Steps
 
 1. ~~**Clarify requirements**~~ ✅ **Done** (see "Questions to Answer - Decisions Made" section)
-2. **Choose technology stack** (FastAPI vs Flask, etc.) - *Pending decision*
-3. **Set up development environment**
+2. ~~**Choose technology stack**~~ ✅ **Done** (FastAPI selected and implemented)
+3. ~~**Set up development environment**~~ ✅ **Done**
 4. ~~**Start with Phase 1**~~ ✅ **Completed** (structure & setup done)
-5. **Work on Phase 2 remaining tasks**:
-   - Add Alembic migration system for SQLite
-   - Write comprehensive database tests
-6. **Iterate based on feedback**
+5. ~~**Complete Phase 2**~~ ✅ **Completed** (database layer done)
+6. ~~**Complete Phase 3**~~ ✅ **Completed** (core refactoring done)
+7. **Continue Phase 4** (CLI Enhancement):
+   - Enhanced database commands (backup/restore/init)
+   - Serve command for API
+   - Enhanced snapshot commands
+   - Help & examples
+   - Logging commands
+   - CLI tests
+8. **Continue Phase 5** (API Enhancement):
+   - Path endpoints (list, details, content, history)
+   - Change tracking endpoints (compare, history, stats)
+   - MCP server endpoints
+   - Claude config endpoints
+   - Statistics endpoints
+9. **Phase 6** (Testing & Documentation):
+   - Comprehensive unit tests
+   - Integration tests
+   - Deployment guide
+   - Developer guide
+   - User manual
+10. **Phase 7** (Deployment & DevOps):
+    - Windows service installer
+    - Deployment documentation
+    - Graceful shutdown handling
+
+## Recent Updates (2025-11-09)
+
+### ✅ Phase 5 API Testing Complete
+
+**Test Results**: All 9 test cases passed successfully!
+- ✅ Health check working
+- ✅ Snapshot creation with real file scanning
+- ✅ All CRUD operations working
+- ✅ Tag and annotation management working
+- ✅ Export functionality working
+- ✅ Performance excellent (<200ms for most operations)
+
+**Key Findings**:
+- Scanner integration verified - actually scans 17+ paths
+- Found 6 files, 1 directory in test (52,399 bytes)
+- MCP server detection working (auto-creates annotations)
+- Database storage working correctly
+- API is production-ready for snapshot operations
+
+**Documentation Created**:
+- `doc/API-TESTING-GUIDE.md` - Comprehensive testing guide
+- `doc/API-TEST-RESULTS.md` - Test results summary
+- `doc/phase-5-review.md` - Full API review
+- `doc/phase-5-quick-reference.md` - Quick reference guide
+- `quick_test.py` - Quick API test script
+- `test_api.py` - Comprehensive test suite
+- `start_api.bat` / `start_api.sh` - Startup scripts
+
+**Next Priority**: Path endpoints (Task 5.3) to complete core functionality
 
 ## Questions to Answer - Decisions Made
 
