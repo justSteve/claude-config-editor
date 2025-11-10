@@ -46,11 +46,11 @@
 BEFORE (❌ Dangerous):
 ═════════════════════
 {
-  "api_key": "sk_live_4eC39HqLyjWDarhtT1234567",
+  "api_key": "sk_test_EXAMPLE_KEY_NOT_REAL_1234567890abcdef",
   "password": "MySecretPassword123!",
   "db_url": "postgresql://user:pass123@localhost:5432/db",
   "config_path": "C:\\Users\\john.smith\\AppData\\...",
-  "auth_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "auth_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.EXAMPLE.TOKEN"
 }
 
 AFTER (✅ Safe):
