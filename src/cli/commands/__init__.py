@@ -6,7 +6,7 @@ Organizes commands into logical modules for better maintainability.
 
 import typer
 
-from src.cli.commands import snapshot, database, export, import_cmd, config
+from src.cli.commands import config, database, export, import_cmd, serve, snapshot
 from src.core.config import get_settings
 from src.utils.logger import setup_logging
 
@@ -24,6 +24,7 @@ app.add_typer(database.app, name="db")
 app.add_typer(export.app, name="export")
 app.add_typer(import_cmd.app, name="import")
 app.add_typer(config.app, name="config")
+app.add_typer(serve.app, name="serve")
 
 
 @app.callback()
