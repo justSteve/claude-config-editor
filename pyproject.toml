@@ -52,7 +52,7 @@ dev = [
 ]
 
 [project.scripts]
-claude-config = "src.cli.commands:app"
+claude-config = "src.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/justSteve/claude-config-editor"

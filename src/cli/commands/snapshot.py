@@ -21,7 +21,11 @@ from src.cli.formatters import (
     print_success,
 )
 from src.cli.progress import ScanProgress, show_status
-from src.cli.utils import get_initialized_database, handle_cli_error, validate_snapshot_id
+from src.cli.utils import (
+    get_initialized_database,
+    handle_cli_error,
+    validate_snapshot_id,
+)
 from src.core.config import get_settings
 from src.core.database import close_database
 from src.core.models import Snapshot, SnapshotChange, SnapshotPath
