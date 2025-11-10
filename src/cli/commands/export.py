@@ -14,9 +14,10 @@ from typing import Optional
 import typer
 from rich.console import Console
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from src.cli.formatters import format_datetime, format_size, print_error, print_success
-from src.cli.progress import ExportProgress, show_status
+from src.cli.progress import show_status
 from src.cli.utils import get_initialized_database, handle_cli_error, validate_snapshot_id
 from src.core.config import get_settings
 from src.core.database import close_database
@@ -81,8 +82,18 @@ def export_snapshot(
             db = await get_initialized_database()
 
             async with db.get_session() as session:
-                # Get snapshot with relationships
-                stmt = select(Snapshot).where(Snapshot.id == snapshot_id)
+                # Get snapshot with eagerly loaded relationships
+                stmt = (
+                    select(Snapshot)
+                    .where(Snapshot.id == snapshot_id)
+                    .options(
+                        selectinload(Snapshot.env_vars),
+                        selectinload(Snapshot.paths),
+                        selectinload(Snapshot.changes),
+                        selectinload(Snapshot.tags),
+                        selectinload(Snapshot.annotations),
+                    )
+                )
                 result = await session.execute(stmt)
                 snapshot = result.scalar_one_or_none()
 
@@ -105,24 +116,22 @@ def export_snapshot(
                     console.print(f"  Output: {output}")
                     console.print()
 
-                # Export based on format
-                with ExportProgress(total_items=len(paths) + 1, operation="Exporting") as progress:
-                    if format == "json":
-                        await _export_json(snapshot, paths, output, include_content, compress)
-                    elif format == "yaml":
-                        await _export_yaml(snapshot, paths, output, include_content, compress)
-                    elif format == "html":
-                        await _export_html(snapshot, paths, output)
-                    elif format == "csv":
-                        await _export_csv(snapshot, paths, output)
-
-                    progress.update(advance=len(paths) + 1)
+                # Export based on format (inside session context to keep objects attached)
+                console.print("[bold cyan]Exporting...[/bold cyan]")
+                if format == "json":
+                    await _export_json(snapshot, paths, output, include_content, compress)
+                elif format == "yaml":
+                    await _export_yaml(snapshot, paths, output, include_content, compress)
+                elif format == "html":
+                    await _export_html(snapshot, paths, output)
+                elif format == "csv":
+                    await _export_csv(snapshot, paths, output)
 
                 # Get file size
                 file_size = output.stat().st_size if output.exists() else 0
 
                 print_success(
-                    f"Snapshot exported successfully",
+                    "Snapshot exported successfully",
                     f"File: {output}\nSize: {format_size(file_size)}\nFormat: {format.upper()}",
                 )
 

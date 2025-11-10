@@ -47,6 +47,10 @@ class Settings(BaseSettings):
         default="development",
         description="Application environment (development, production, testing)",
     )
+    debug: bool = Field(
+        default=False,
+        description="Enable debug mode (enables verbose logging and development features)",
+    )
 
     # Database Configuration
     database_url: str = Field(
