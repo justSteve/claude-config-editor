@@ -80,12 +80,19 @@ A beautiful web interface to:
 **Three commands. Zero dependencies. Zero configuration.**
 
 ```bash
-git clone https://github.com/gagarinyury/claude-config-editor.git
+git clone https://github.com/justSteve/claude-config-editor.git
 cd claude-config-editor
-python3 server.py
+pip install -e .
+python -m src.api.app
 ```
 
 **That's it.** Opens at `http://localhost:8765`.
+
+Or use the CLI for configuration management:
+```bash
+python -m src.cli.commands snapshot create
+python -m src.cli.commands snapshot list
+```
 
 ### What Happens Next
 
