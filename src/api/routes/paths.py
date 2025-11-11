@@ -76,12 +76,11 @@ async def list_paths(
         pagination=pagination,
     )
 
-    return PathListResponse(
+    return PathListResponse.create(
         items=paths,
         total=total,
         page=pagination.page,
         page_size=pagination.page_size,
-        total_pages=(total + pagination.page_size - 1) // pagination.page_size,
     )
 
 
@@ -157,7 +156,8 @@ async def get_path_content(
 )
 async def get_path_history(
     path_id: int,
-    limit: Optional[int] = Query(None, description="Limit number of history entries", ge=1),
+    limit: Optional[int] = Query(
+        None, description="Limit number of history entries", ge=1),
     db: AsyncSession = Depends(get_db),
 ) -> list[PathSummary]:
     """
@@ -227,12 +227,11 @@ async def search_paths(
         pagination=pagination,
     )
 
-    return PathListResponse(
+    return PathListResponse.create(
         items=paths,
         total=total,
         page=pagination.page,
         page_size=pagination.page_size,
-        total_pages=(total + pagination.page_size - 1) // pagination.page_size,
     )
 
 
@@ -245,7 +244,8 @@ async def search_paths(
 )
 async def add_path_annotation(
     path_id: int,
-    annotation_text: str = Query(..., description="Annotation text", min_length=1),
+    annotation_text: str = Query(...,
+                                 description="Annotation text", min_length=1),
     annotation_type: Optional[str] = Query(
         None, description="Annotation type (e.g., note, warning, todo)"
     ),
