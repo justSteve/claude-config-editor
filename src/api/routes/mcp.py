@@ -87,7 +87,7 @@ async def list_mcp_servers(
         total=total,
         page=pagination.page,
         page_size=pagination.limit,
-        pages=(total + pagination.limit - 1) // pagination.limit if total > 0 else 0,
+        total_pages=(total + pagination.limit - 1) // pagination.limit if total > 0 else 0,
         has_next=pagination.offset + len(servers) < total,
         has_previous=pagination.page > 1,
     )
