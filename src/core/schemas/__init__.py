@@ -53,6 +53,18 @@ from src.core.schemas.claude_config import (
     ClaudeConfigDetailResponse,
 )
 
+# MCP server schemas
+from src.core.schemas.mcp import (
+    McpServerSummary,
+    McpServerDetail,
+    McpServerStatusResponse,
+    McpServerConfigResponse,
+    McpServerCapabilitiesResponse,
+    McpServerLogsResponse,
+    McpServerListResponse,
+    McpServerStatsResponse,
+)
+
 # Change schemas
 from src.core.schemas.changes import (
     ChangeBase,
@@ -134,6 +146,15 @@ __all__ = [
     "ConfigSummaryStats",
     "ClaudeConfigListResponse",
     "ClaudeConfigDetailResponse",
+    # MCP servers
+    "McpServerSummary",
+    "McpServerDetail",
+    "McpServerStatusResponse",
+    "McpServerConfigResponse",
+    "McpServerCapabilitiesResponse",
+    "McpServerLogsResponse",
+    "McpServerListResponse",
+    "McpServerStatsResponse",
     # Changes
     "ChangeBase",
     "ChangeResponse",
