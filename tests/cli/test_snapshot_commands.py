@@ -119,7 +119,8 @@ class TestSnapshotList:
         await cli_session.commit()
 
         with patch("src.cli.commands.snapshot.get_initialized_database", return_value=cli_db_manager):
-            result = cli_runner.invoke(app, ["snapshot", "list", "--limit", "3"])
+            result = cli_runner.invoke(
+                app, ["snapshot", "list", "--limit", "3"])
 
             assert result.exit_code == 0
 
@@ -144,7 +145,8 @@ class TestSnapshotShow:
             )
 
             assert result.exit_code == 0
-            assert str(sample_snapshot.id) in result.output or "snapshot" in result.output.lower()
+            assert str(
+                sample_snapshot.id) in result.output or "snapshot" in result.output.lower()
 
     @pytest.mark.asyncio
     async def test_show_snapshot_not_found(self, cli_runner: CliRunner, cli_db_manager):
@@ -248,7 +250,8 @@ class TestSnapshotShow:
         result = cli_runner.invoke(app, ["snapshot", "show", "-1"])
 
         # Should fail validation or show error
-        assert result.exit_code != 0 or "invalid" in result.output.lower() or "error" in result.output.lower()
+        assert result.exit_code != 0 or "invalid" in result.output.lower(
+        ) or "error" in result.output.lower()
 
     @pytest.mark.asyncio
     async def test_show_snapshot_verbose(self, cli_runner: CliRunner, cli_db_manager, sample_snapshot):
@@ -368,7 +371,8 @@ class TestSnapshotCompare:
         with patch("src.cli.commands.snapshot.get_initialized_database", return_value=cli_db_manager):
             result = cli_runner.invoke(
                 app,
-                ["snapshot", "compare", str(snapshot2.id), "--previous", str(snapshot1.id)],
+                ["snapshot", "compare", str(
+                    snapshot2.id), "--previous", str(snapshot1.id)],
             )
 
             assert result.exit_code == 0
@@ -458,7 +462,8 @@ class TestSnapshotCompare:
             )
 
             assert result.exit_code == 0
-            assert "no previous" in result.output.lower() or "not found" in result.output.lower()
+            assert "no previous" in result.output.lower(
+            ) or "not found" in result.output.lower()
 
     @pytest.mark.asyncio
     async def test_compare_snapshots_verbose(self, cli_runner: CliRunner, cli_db_manager, cli_session):

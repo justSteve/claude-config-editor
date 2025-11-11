@@ -804,14 +804,14 @@ CREATE INDEX idx_history_changed ON config_history(changed_at);
 - [x] Snapshot endpoints with scanner integration ✅
 - [x] Error handling and exception handlers ✅
 - [x] Path endpoints (list, details, content, history, search, annotations) ✅
-- [ ] Change tracking endpoints (compare, history, stats)
-- [ ] MCP server endpoints
-- [ ] Claude config endpoints
+- [x] Change tracking endpoints (compare, history, stats)
+- [x] MCP server endpoints (6 endpoints + sanitization) ✅
+- [x] Claude config endpoints ✅
 - [ ] Statistics endpoints
 - [ ] Enhanced export/import endpoints
 - [ ] Health and monitoring (basic done)
 
-**Status**: **40% COMPLETE** 🚧 (4 of 10 tasks done)
+**Status**: **60% COMPLETE** 🚧 (6 of 10 tasks done)
 
 **Completed Tasks**:
 1. ✅ **Task 5.1**: FastAPI application setup (100%)

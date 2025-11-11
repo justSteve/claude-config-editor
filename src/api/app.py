@@ -132,7 +132,7 @@ def create_app() -> FastAPI:
         }
 
     # Include routers
-    from src.api.routes import snapshots, claude_config, paths
+    from src.api.routes import snapshots, claude_config, paths, mcp
 
     app.include_router(
         snapshots.router,
@@ -150,6 +150,12 @@ def create_app() -> FastAPI:
         paths.router,
         prefix="/api/v1",
         tags=["Paths"],
+    )
+
+    app.include_router(
+        mcp.router,
+        prefix="/api/v1",
+        tags=["MCP Servers"],
     )
 
     # TODO: Add more routers as they're implemented
