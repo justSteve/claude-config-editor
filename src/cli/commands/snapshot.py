@@ -20,7 +20,7 @@ from src.cli.formatters import (
     print_error,
     print_success,
 )
-from src.cli.progress import ScanProgress, show_status
+from src.cli.progress import show_status
 from src.cli.utils import (
     get_initialized_database,
     handle_cli_error,
@@ -28,7 +28,7 @@ from src.cli.utils import (
 )
 from src.core.config import get_settings
 from src.core.database import close_database
-from src.core.models import Snapshot, SnapshotChange, SnapshotPath
+from src.core.models import Annotation, Snapshot, SnapshotChange, SnapshotPath, SnapshotTag
 from src.core.scanner import PathScanner
 from src.utils.logger import get_logger
 
@@ -49,6 +49,22 @@ def create_snapshot(
         "--tag",
         help="Optional tag name for this snapshot",
     ),
+    categories: Optional[str] = typer.Option(
+        None,
+        "--categories",
+        "-c",
+        help="Comma-separated list of categories to scan (settings, memory, subagents, desktop)",
+    ),
+    include_missing: bool = typer.Option(
+        False,
+        "--include-missing",
+        help="Include paths that don't exist in scan results",
+    ),
+    skip_content: bool = typer.Option(
+        False,
+        "--skip-content",
+        help="Don't read file contents, only metadata",
+    ),
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -66,16 +82,39 @@ def create_snapshot(
             async with db.get_session() as session:
                 scanner = PathScanner(session)
 
+                # Parse category filter if provided
+                category_filter = None
+                if categories:
+                    category_filter = [c.strip()
+                                       for c in categories.split(",")]
+                    valid_categories = {"settings",
+                                        "memory", "subagents", "desktop"}
+                    invalid = set(category_filter) - valid_categories
+                    if invalid:
+                        print_error(
+                            f"Invalid categories: {', '.join(invalid)}")
+                        console.print(
+                            f"[yellow]Valid categories: {', '.join(valid_categories)}[/yellow]")
+                        return
+
                 # Get path definitions for progress tracking
                 path_defs = scanner.get_path_definitions()
 
+                # Filter by categories if specified
+                if category_filter:
+                    path_defs = [p for p in path_defs if p.get(
+                        "category") in category_filter]
+
                 if verbose:
+                    filter_msg = f" (filtered to: {', '.join(category_filter)})" if category_filter else ""
                     console.print(
-                        f"\n[cyan]Scanning {len(path_defs)} configured paths...[/cyan]\n"
+                        f"\n[cyan]Scanning {len(path_defs)} configured paths{filter_msg}...[/cyan]\n"
                     )
 
                 # Create snapshot with progress tracking
                 with show_status("Creating snapshot...", "Snapshot created successfully!"):
+                    # Note: Scanner doesn't currently support all these options
+                    # They would need to be added to PathScanner.create_snapshot()
                     snapshot = await scanner.create_snapshot(
                         trigger_type="cli",
                         triggered_by=get_settings().environment,
@@ -344,7 +383,7 @@ def compare_snapshots(
 
                 # Display comparison
                 console.print(
-                    f"\n[bold cyan]Comparing Snapshots[/bold cyan]\n")
+                    "\n[bold cyan]Comparing Snapshots[/bold cyan]\n")
                 console.print(
                     f"[bold]Previous:[/bold] {previous.id} ({format_datetime(previous.snapshot_time)})")
                 console.print(
@@ -360,7 +399,7 @@ def compare_snapshots(
                 modified = [c for c in changes if c.change_type == "modified"]
                 deleted = [c for c in changes if c.change_type == "deleted"]
 
-                console.print(f"[bold]Summary:[/bold]")
+                console.print("[bold]Summary:[/bold]")
                 console.print(f"  [green]Added:[/green] {len(added)}")
                 console.print(f"  [yellow]Modified:[/yellow] {len(modified)}")
                 console.print(f"  [red]Deleted:[/red] {len(deleted)}")
@@ -408,6 +447,299 @@ def compare_snapshots(
             await close_database()
 
     asyncio.run(_compare())
+
+
+@app.command("delete")
+def delete_snapshot(
+    snapshot_id: int = typer.Argument(..., help="Snapshot ID to delete"),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Skip confirmation prompt",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Show detailed information",
+    ),
+) -> None:
+    """Delete a snapshot and all associated data."""
+    validate_snapshot_id(snapshot_id)
+
+    async def _delete() -> None:
+        try:
+            db = await get_initialized_database()
+
+            async with db.get_session() as session:
+                # Get snapshot to verify it exists
+                stmt = select(Snapshot).where(Snapshot.id == snapshot_id)
+                result = await session.execute(stmt)
+                snapshot = result.scalar_one_or_none()
+
+                if not snapshot:
+                    print_error(f"Snapshot {snapshot_id} not found")
+                    return
+
+                # Confirm deletion unless --force is used
+                if not force:
+                    console.print(
+                        "\n[yellow]⚠ Warning:[/yellow] You are about to delete:")
+                    console.print(f"  Snapshot ID: {snapshot.id}")
+                    console.print(
+                        f"  Created: {format_datetime(snapshot.snapshot_time)}")
+                    console.print(f"  Files: {snapshot.files_found}")
+                    console.print(
+                        f"  Hash: {format_hash(snapshot.snapshot_hash)}")
+                    console.print("\nThis will also delete:")
+                    console.print("  - All associated paths")
+                    console.print("  - All file contents")
+                    console.print("  - All changes")
+                    console.print("  - All tags")
+                    console.print("  - All annotations")
+
+                    confirm = typer.confirm(
+                        "\nAre you sure you want to delete this snapshot?")
+                    if not confirm:
+                        console.print(
+                            "\n[yellow]Deletion cancelled[/yellow]\n")
+                        return
+
+                # Delete the snapshot (cascade will handle related records)
+                with show_status(
+                    f"Deleting snapshot {snapshot_id}...",
+                    f"Snapshot {snapshot_id} deleted successfully"
+                ):
+                    await session.delete(snapshot)
+                    await session.commit()
+
+        except Exception as e:
+            handle_cli_error(e, verbose=verbose)
+        finally:
+            await close_database()
+
+    asyncio.run(_delete())
+
+
+@app.command("tag")
+def manage_tags(
+    snapshot_id: int = typer.Argument(..., help="Snapshot ID to tag"),
+    tag_name: Optional[str] = typer.Option(
+        None,
+        "--add",
+        "-a",
+        help="Add a tag to the snapshot",
+    ),
+    remove: Optional[str] = typer.Option(
+        None,
+        "--remove",
+        "-r",
+        help="Remove a tag from the snapshot",
+    ),
+    list_tags: bool = typer.Option(
+        False,
+        "--list",
+        "-l",
+        help="List all tags for the snapshot",
+    ),
+    description: Optional[str] = typer.Option(
+        None,
+        "--description",
+        "-d",
+        help="Description for the tag (when adding)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Show detailed information",
+    ),
+) -> None:
+    """Manage tags for a snapshot."""
+    validate_snapshot_id(snapshot_id)
+
+    async def _manage_tags() -> None:
+        try:
+            db = await get_initialized_database()
+
+            async with db.get_session() as session:
+                # Verify snapshot exists
+                stmt = select(Snapshot).where(Snapshot.id == snapshot_id)
+                result = await session.execute(stmt)
+                snapshot = result.scalar_one_or_none()
+
+                if not snapshot:
+                    print_error(f"Snapshot {snapshot_id} not found")
+                    return
+
+                # Add tag
+                if tag_name:
+                    # Check if tag already exists
+                    stmt = select(SnapshotTag).where(
+                        SnapshotTag.snapshot_id == snapshot_id,
+                        SnapshotTag.tag_name == tag_name,
+                    )
+                    result = await session.execute(stmt)
+                    existing_tag = result.scalar_one_or_none()
+
+                    if existing_tag:
+                        console.print(
+                            f"\n[yellow]Tag '{tag_name}' already exists on snapshot {snapshot_id}[/yellow]\n")
+                        return
+
+                    # Create new tag
+                    new_tag = SnapshotTag(
+                        snapshot_id=snapshot_id,
+                        tag_name=tag_name,
+                        description=description,
+                        created_by="cli",
+                    )
+                    session.add(new_tag)
+                    await session.commit()
+                    print_success(
+                        f"Tag '{tag_name}' added to snapshot {snapshot_id}")
+
+                # Remove tag
+                elif remove:
+                    stmt = select(SnapshotTag).where(
+                        SnapshotTag.snapshot_id == snapshot_id,
+                        SnapshotTag.tag_name == remove,
+                    )
+                    result = await session.execute(stmt)
+                    tag = result.scalar_one_or_none()
+
+                    if not tag:
+                        print_error(
+                            f"Tag '{remove}' not found on snapshot {snapshot_id}")
+                        return
+
+                    await session.delete(tag)
+                    await session.commit()
+                    print_success(
+                        f"Tag '{remove}' removed from snapshot {snapshot_id}")
+
+                # List tags
+                elif list_tags:
+                    stmt = select(SnapshotTag).where(
+                        SnapshotTag.snapshot_id == snapshot_id
+                    ).order_by(SnapshotTag.created_at)
+                    result = await session.execute(stmt)
+                    tags = result.scalars().all()
+
+                    if not tags:
+                        console.print(
+                            f"\n[yellow]No tags found for snapshot {snapshot_id}[/yellow]\n")
+                        return
+
+                    console.print(
+                        f"\n[bold]Tags for Snapshot {snapshot_id}:[/bold]\n")
+                    for tag in tags:
+                        desc = f" - {tag.description}" if tag.description else ""
+                        console.print(f"  • {tag.tag_name}{desc}")
+                    console.print()
+
+                else:
+                    print_error("Please specify --add, --remove, or --list")
+
+        except Exception as e:
+            handle_cli_error(e, verbose=verbose)
+        finally:
+            await close_database()
+
+    asyncio.run(_manage_tags())
+
+
+@app.command("annotate")
+def manage_annotations(
+    snapshot_id: int = typer.Argument(..., help="Snapshot ID to annotate"),
+    text: Optional[str] = typer.Option(
+        None,
+        "--add",
+        "-a",
+        help="Add an annotation to the snapshot",
+    ),
+    list_annotations: bool = typer.Option(
+        False,
+        "--list",
+        "-l",
+        help="List all annotations for the snapshot",
+    ),
+    annotation_type: Optional[str] = typer.Option(
+        None,
+        "--type",
+        "-t",
+        help="Type of annotation (note, warning, error, etc.)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Show detailed information",
+    ),
+) -> None:
+    """Manage annotations for a snapshot."""
+    validate_snapshot_id(snapshot_id)
+
+    async def _manage_annotations() -> None:
+        try:
+            db = await get_initialized_database()
+
+            async with db.get_session() as session:
+                # Verify snapshot exists
+                stmt = select(Snapshot).where(Snapshot.id == snapshot_id)
+                result = await session.execute(stmt)
+                snapshot = result.scalar_one_or_none()
+
+                if not snapshot:
+                    print_error(f"Snapshot {snapshot_id} not found")
+                    return
+
+                # Add annotation
+                if text:
+                    new_annotation = Annotation(
+                        snapshot_id=snapshot_id,
+                        annotation_text=text,
+                        annotation_type=annotation_type or "note",
+                        created_by="cli",
+                    )
+                    session.add(new_annotation)
+                    await session.commit()
+                    print_success(
+                        f"Annotation added to snapshot {snapshot_id}")
+
+                # List annotations
+                elif list_annotations:
+                    stmt = select(Annotation).where(
+                        Annotation.snapshot_id == snapshot_id
+                    ).order_by(Annotation.created_at)
+                    result = await session.execute(stmt)
+                    annotations = result.scalars().all()
+
+                    if not annotations:
+                        console.print(
+                            f"\n[yellow]No annotations found for snapshot {snapshot_id}[/yellow]\n")
+                        return
+
+                    console.print(
+                        f"\n[bold]Annotations for Snapshot {snapshot_id}:[/bold]\n")
+                    for ann in annotations:
+                        type_label = f"[{ann.annotation_type}]" if ann.annotation_type else ""
+                        time_label = format_datetime(ann.created_at)
+                        console.print(
+                            f"  • {type_label} {ann.annotation_text}")
+                        console.print(f"    [dim]{time_label}[/dim]")
+                    console.print()
+
+                else:
+                    print_error("Please specify --add or --list")
+
+        except Exception as e:
+            handle_cli_error(e, verbose=verbose)
+        finally:
+            await close_database()
+
+    asyncio.run(_manage_annotations())
 
 
 if __name__ == "__main__":
