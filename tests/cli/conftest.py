@@ -77,10 +77,9 @@ async def sample_snapshot(cli_session: AsyncSession) -> Snapshot:
         username="test_user",
         trigger_type="manual",
         triggered_by="test",
-        total_scanned=10,
+        total_locations=10,
         files_found=5,
         directories_found=2,
-        missing_paths=3,
         total_size_bytes=1024000,
         notes="Test snapshot",
     )
@@ -125,10 +124,9 @@ def mock_scanner():
             username="mock_user",
             trigger_type=kwargs.get("trigger_type", "manual"),
             triggered_by=kwargs.get("triggered_by", "test"),
-            total_scanned=5,
+            total_locations=5,
             files_found=3,
             directories_found=1,
-            missing_paths=1,
             total_size_bytes=5000,
             notes=kwargs.get("notes"),
         )

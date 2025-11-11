@@ -132,10 +132,10 @@ class TestTableCreation:
                 username="test",
                 trigger_type="manual",
                 triggered_by="test",
-                total_scanned=10,
+                total_locations=10,
                 files_found=5,
                 directories_found=2,
-                missing_paths=3,
+
                 total_size_bytes=1024,
             )
         ]
@@ -248,10 +248,10 @@ class TestEdgeCases:
                     username="test",
                     trigger_type="manual",
                     triggered_by="test",
-                    total_scanned=10,
+                    total_locations=10,
                     files_found=5,
                     directories_found=2,
-                    missing_paths=3,
+
                     total_size_bytes=1024,
                 )
             )

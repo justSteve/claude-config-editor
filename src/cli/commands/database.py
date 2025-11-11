@@ -4,16 +4,13 @@ Database management commands.
 Commands for database statistics, maintenance, and management.
 """
 
-import asyncio
-from typing import Optional
-
 import typer
 from rich.console import Console
 from sqlalchemy import func, select
 
 from src.cli.formatters import create_stats_table, format_size, print_error, print_success
 from src.cli.progress import show_status
-from src.cli.utils import confirm_action, get_initialized_database, handle_cli_error
+from src.cli.utils import confirm_action, get_initialized_database, handle_cli_error, run_async
 from src.core.database import close_database
 from src.core.models import FileContent
 from src.utils.logger import get_logger
@@ -57,7 +54,7 @@ def show_stats(
         finally:
             await close_database()
 
-    asyncio.run(_stats())
+    run_async(_stats())
 
 
 @app.command("dedup")
@@ -141,7 +138,7 @@ def show_deduplication(
         finally:
             await close_database()
 
-    asyncio.run(_dedup())
+    run_async(_dedup())
 
 
 @app.command("vacuum")
@@ -191,7 +188,7 @@ def vacuum_database(
         finally:
             await close_database()
 
-    asyncio.run(_vacuum())
+    run_async(_vacuum())
 
 
 @app.command("health")
@@ -231,7 +228,7 @@ def health_check(
         finally:
             await close_database()
 
-    asyncio.run(_health())
+    run_async(_health())
 
 
 if __name__ == "__main__":
