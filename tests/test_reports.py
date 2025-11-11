@@ -1,12 +1,14 @@
 """Test reporting functionality."""
 import asyncio
-import json
-from src.core.config import get_settings
-from src.core.database import init_database, close_database
-from src.reports.generators import generate_change_report, generate_snapshot_report
-from src.reports.formatters import JSONFormatter, CLIFormatter
+from pathlib import Path
 
-async def test_change_report():
+from src.core.config import get_settings
+from src.core.database import close_database, init_database
+from src.reports.formatters import JSONFormatter
+from src.reports.generators import generate_change_report, generate_snapshot_report
+
+
+async def test_change_report(tmp_path: Path):
     settings = get_settings()
     db = await init_database(settings.database_url, echo=False)
 
@@ -15,16 +17,18 @@ async def test_change_report():
             # Generate change report
             report = await generate_change_report(session, snapshot_id=2)
 
-            # Save as JSON
+            # Save as JSON to temp directory
             formatter = JSONFormatter()
             json_output = formatter.format_change_report(report)
-            with open("change_report.json", "w") as f:
+            output_file = tmp_path / "change_report.json"
+            with open(output_file, "w") as f:
                 f.write(json_output)
-            print("SUCCESS: Change report saved to change_report.json")
+            print(f"SUCCESS: Change report saved to {output_file}")
 
             # Show summary
-            print(f"\nChange Summary:")
-            print(f"  Snapshot {report.snapshot_id} vs {report.previous_snapshot_id}")
+            print("\nChange Summary:")
+            print(
+                f"  Snapshot {report.snapshot_id} vs {report.previous_snapshot_id}")
             print(f"  Total changes: {report.total_changes}")
             print(f"  Added: {len(report.added_files)}")
             print(f"  Modified: {len(report.modified_files)}")
@@ -34,7 +38,8 @@ async def test_change_report():
     finally:
         await close_database()
 
-async def test_snapshot_report():
+
+async def test_snapshot_report(tmp_path: Path):
     settings = get_settings()
     db = await init_database(settings.database_url, echo=False)
 
@@ -43,20 +48,23 @@ async def test_snapshot_report():
             # Generate snapshot report
             report = await generate_snapshot_report(session, snapshot_id=2)
 
-            # Save as JSON
+            # Save as JSON to temp directory
             formatter = JSONFormatter()
             json_output = formatter.format_snapshot_report(report)
-            with open("snapshot_report.json", "w") as f:
+            output_file = tmp_path / "snapshot_report.json"
+            with open(output_file, "w") as f:
                 f.write(json_output)
-            print("\nSUCCESS: Snapshot report saved to snapshot_report.json")
+            print(f"\nSUCCESS: Snapshot report saved to {output_file}")
 
             # Show summary
-            print(f"\nSnapshot Summary:")
+            print("\nSnapshot Summary:")
             print(f"  ID: {report.snapshot_id}")
             print(f"  Time: {report.snapshot_time}")
-            print(f"  Files: {report.files_found}, Dirs: {report.directories_found}")
+            print(
+                f"  Files: {report.files_found}, Dirs: {report.directories_found}")
             print(f"  Total size: {report.total_size_bytes:,} bytes")
-            print(f"  Deduplication: {report.deduplication_percent:.1f}% savings")
+            print(
+                f"  Deduplication: {report.deduplication_percent:.1f}% savings")
 
     finally:
         await close_database()

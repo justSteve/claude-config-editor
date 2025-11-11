@@ -108,10 +108,10 @@ class TestSnapshotList:
                 username="test",
                 trigger_type="manual",
                 triggered_by="test",
-                total_scanned=1,
+                total_locations=1,
                 files_found=1,
                 directories_found=0,
-                missing_paths=0,
+
                 total_size_bytes=1000,
             )
             cli_session.add(snapshot)
@@ -192,10 +192,10 @@ class TestSnapshotShow:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot1)
@@ -210,10 +210,10 @@ class TestSnapshotShow:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
             changed_from_previous=1,
         )
@@ -277,10 +277,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot1)
@@ -295,10 +295,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
             changed_from_previous=1,
         )
@@ -339,10 +339,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot1)
@@ -357,10 +357,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot2)
@@ -387,10 +387,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot1)
@@ -405,10 +405,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
             changed_from_previous=0,
         )
@@ -444,10 +444,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot)
@@ -474,10 +474,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot1)
@@ -492,10 +492,10 @@ class TestSnapshotCompare:
             username="test",
             trigger_type="manual",
             triggered_by="test",
-            total_scanned=1,
+            total_locations=1,
             files_found=1,
             directories_found=0,
-            missing_paths=0,
+
             total_size_bytes=1000,
         )
         cli_session.add(snapshot2)

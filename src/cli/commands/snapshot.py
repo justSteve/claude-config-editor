@@ -4,7 +4,6 @@ Snapshot management commands.
 Commands for creating, listing, viewing, and comparing snapshots.
 """
 
-import asyncio
 from typing import Optional
 
 import typer
@@ -24,6 +23,7 @@ from src.cli.progress import show_status
 from src.cli.utils import (
     get_initialized_database,
     handle_cli_error,
+    run_async,
     validate_snapshot_id,
 )
 from src.core.config import get_settings
@@ -149,7 +149,7 @@ def create_snapshot(
         finally:
             await close_database()
 
-    asyncio.run(_create())
+    run_async(_create())
 
 
 @app.command("list")
@@ -200,7 +200,7 @@ def list_snapshots(
         finally:
             await close_database()
 
-    asyncio.run(_list())
+    run_async(_list())
 
 
 @app.command("show")
@@ -310,7 +310,7 @@ def show_snapshot(
         finally:
             await close_database()
 
-    asyncio.run(_show())
+    run_async(_show())
 
 
 @app.command("compare")
@@ -446,7 +446,7 @@ def compare_snapshots(
         finally:
             await close_database()
 
-    asyncio.run(_compare())
+    run_async(_compare())
 
 
 @app.command("delete")
@@ -519,7 +519,7 @@ def delete_snapshot(
         finally:
             await close_database()
 
-    asyncio.run(_delete())
+    run_async(_delete())
 
 
 @app.command("tag")
@@ -647,7 +647,7 @@ def manage_tags(
         finally:
             await close_database()
 
-    asyncio.run(_manage_tags())
+    run_async(_manage_tags())
 
 
 @app.command("annotate")
@@ -739,7 +739,7 @@ def manage_annotations(
         finally:
             await close_database()
 
-    asyncio.run(_manage_annotations())
+    run_async(_manage_annotations())
 
 
 if __name__ == "__main__":

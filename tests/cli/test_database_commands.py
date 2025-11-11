@@ -82,13 +82,15 @@ class TestDatabaseDedup:
         # Create some file contents
         file1 = FileContent(
             content_hash="hash1",
-            content="content1",
+            content_text="content1",
+            content_type="text",
             size_bytes=1000,
             reference_count=3,  # Referenced 3 times
         )
         file2 = FileContent(
             content_hash="hash2",
-            content="content2",
+            content_text="content2",
+            content_type="text",
             size_bytes=2000,
             reference_count=1,  # Referenced once
         )
@@ -110,7 +112,8 @@ class TestDatabaseDedup:
         # Create file with multiple references
         file = FileContent(
             content_hash="hash1",
-            content="content1",
+            content_text="content1",
+            content_type="text",
             size_bytes=1000,
             reference_count=5,
         )
@@ -132,13 +135,15 @@ class TestDatabaseDedup:
         # Create files with known reference counts
         file1 = FileContent(
             content_hash="hash1",
-            content="content1",
+            content_text="content1",
+            content_type="text",
             size_bytes=1000,
             reference_count=3,  # Saved 2x duplicates
         )
         file2 = FileContent(
             content_hash="hash2",
-            content="content2",
+            content_text="content2",
+            content_type="text",
             size_bytes=1000,
             reference_count=2,  # Saved 1x duplicate
         )
@@ -261,7 +266,8 @@ class TestDatabaseHealth:
             assert result.exit_code == 0
             assert "healthy" in result.output.lower()
             # Should show detailed health information
-            assert "connected" in result.output.lower() or "tables" in result.output.lower() or "size" in result.output.lower()
+            assert "connected" in result.output.lower(
+            ) or "tables" in result.output.lower() or "size" in result.output.lower()
 
     @pytest.mark.asyncio
     async def test_health_check_error_handling(self, cli_runner: CliRunner):
@@ -301,7 +307,8 @@ class TestDatabaseIntegration:
         # Add some file content
         file = FileContent(
             content_hash="hash1",
-            content="content1",
+            content_text="content1",
+            content_type="text",
             size_bytes=1000,
             reference_count=2,
         )
@@ -319,4 +326,5 @@ class TestDatabaseIntegration:
             # Check dedup stats
             result2 = cli_runner.invoke(app, ["db", "dedup"])
             assert result2.exit_code == 0
-            assert "unique" in result2.output.lower() or "deduplication" in result2.output.lower()
+            assert "unique" in result2.output.lower(
+            ) or "deduplication" in result2.output.lower()

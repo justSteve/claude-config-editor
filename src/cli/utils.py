@@ -4,18 +4,74 @@ Shared CLI utilities.
 Common functions used across CLI commands.
 """
 
+import asyncio
 import sys
-from typing import Any, Callable, Optional
+from collections.abc import Coroutine
+from typing import Any, Callable, TypeVar
 
 import typer
 from rich.console import Console
 
 from src.core.config import get_settings
-from src.core.database import close_database, get_db_manager, init_database
+from src.core.database import init_database
 from src.utils.logger import get_logger, setup_logging
 
 console = Console()
 logger = get_logger(__name__)
+
+T = TypeVar('T')
+
+
+def run_async(coro: Coroutine[Any, Any, T]) -> T:
+    """
+    Run an async coroutine, handling existing event loops gracefully.
+
+    This function is designed to work both in normal CLI usage (where asyncio.run()
+    is appropriate) and in testing environments (where an event loop may already exist).
+
+    Args:
+        coro: The coroutine to execute
+
+    Returns:
+        The result of the coroutine
+
+    Raises:
+        Any exception raised by the coroutine
+    """
+    import threading
+
+    try:
+        # Try to get the current running loop
+        asyncio.get_running_loop()
+        # We're in an async context already (e.g., pytest-asyncio)
+        # We need to run the coroutine in a separate thread to avoid nested event loop
+        result_container = []
+        exception_container = []
+
+        def run_in_thread():
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    result = loop.run_until_complete(coro)
+                    result_container.append(result)
+                finally:
+                    loop.close()
+            except Exception as e:
+                exception_container.append(e)
+
+        thread = threading.Thread(target=run_in_thread)
+        thread.start()
+        thread.join()
+
+        if exception_container:
+            raise exception_container[0]
+        # type: ignore
+        return result_container[0] if result_container else None
+
+    except RuntimeError:
+        # No event loop running, use asyncio.run() (normal CLI usage)
+        return asyncio.run(coro)
 
 
 async def get_initialized_database():
