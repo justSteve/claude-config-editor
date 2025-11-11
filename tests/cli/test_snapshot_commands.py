@@ -166,7 +166,7 @@ class TestSnapshotShow:
             path_template="%APPDATA%/test",
             resolved_path="C:/Users/test/AppData/Roaming/test",
             exists=True,
-            path_type="file",
+            type="file",
             size_bytes=1024,
         )
         cli_session.add(path)
@@ -227,7 +227,6 @@ class TestSnapshotShow:
             previous_snapshot_id=snapshot1.id,
             change_type="modified",
             path_template="%APPDATA%/test",
-            resolved_path="C:/Users/test/AppData/Roaming/test",
             old_content_hash="oldhash",
             new_content_hash="newhash",
             old_size_bytes=1000,
@@ -312,7 +311,6 @@ class TestSnapshotCompare:
             previous_snapshot_id=snapshot1.id,
             change_type="modified",
             path_template="%APPDATA%/test",
-            resolved_path="C:/Users/test/AppData/Roaming/test",
             old_content_hash="oldhash",
             new_content_hash="newhash",
         )
@@ -398,7 +396,7 @@ class TestSnapshotCompare:
         await cli_session.refresh(snapshot1)
 
         snapshot2 = Snapshot(
-            snapshot_hash="hash1",  # Same hash = no changes
+            snapshot_hash="hash1_no_change",  # Different hash but represents same state
             snapshot_time=datetime.now(timezone.utc),
             os_type="Windows",
             os_version="10.0",
