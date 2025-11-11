@@ -125,7 +125,18 @@ def handle_cli_error(error: Exception, verbose: bool = False):
     console.print(f"\n[bold red]✗ Error:[/bold red] {error_message}\n")
 
     if verbose:
-        console.print_exception(show_locals=True)
+        # Use print instead of print_exception when not in except block
+        import traceback
+
+        # Get the traceback from the exception
+        if error.__traceback__:
+            tb_lines = traceback.format_exception(
+                type(error), error, error.__traceback__
+            )
+            console.print("[red]" + "".join(tb_lines) + "[/red]")
+        else:
+            console.print(f"[red]{error_type}: {error_message}[/red]")
+
         logger.error(
             f"CLI error: {error_type}: {error_message}", exc_info=True)
     else:

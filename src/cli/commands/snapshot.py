@@ -266,17 +266,18 @@ def show_snapshot(
                     result = await session.execute(stmt)
                     paths = result.scalars().all()
 
-                    console.print(
-                        f"\n[bold]Scanned Paths ({len(paths)}):[/bold]\n")
-                    for path in paths[:20]:  # Limit to first 20
-                        status = "✓" if path.exists else "✗"
-                        console.print(
-                            f"  [{'' if path.exists else 'dim'}]{status} {path.name}[/]"
-                        )
+                console.print(
+                    f"\n[bold]Scanned Paths ({len(paths)}):[/bold]\n")
+                for path in paths[:20]:  # Limit to first 20
+                    status = "✓" if path.exists else "✗"
+                    if path.exists:
+                        console.print(f"  {status} {path.name}")
+                    else:
+                        console.print(f"  [dim]{status} {path.name}[/dim]")
 
-                    if len(paths) > 20:
-                        console.print(
-                            f"\n  [dim]... and {len(paths) - 20} more[/dim]")
+                if len(paths) > 20:
+                    console.print(
+                        f"\n  [dim]... and {len(paths) - 20} more[/dim]")
 
                 # Show changes if requested
                 if show_changes and snapshot.changed_from_previous:

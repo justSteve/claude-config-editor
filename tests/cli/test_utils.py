@@ -129,22 +129,18 @@ class TestGetInitializedDatabase:
     async def test_get_initialized_database_success(self):
         """Test successful database initialization."""
         mock_db = AsyncMock()
-        mock_db.initialize = AsyncMock()
 
-        with patch("src.cli.utils.DatabaseManager", return_value=mock_db):
+        with patch("src.cli.utils.init_database", return_value=mock_db):
             result = await get_initialized_database()
 
             assert result is not None
-            # Database should be initialized
-            mock_db.initialize.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_get_initialized_database_with_custom_url(self):
         """Test database initialization with custom URL."""
         mock_db = AsyncMock()
-        mock_db.initialize = AsyncMock()
 
-        with patch("src.cli.utils.DatabaseManager", return_value=mock_db):
+        with patch("src.cli.utils.init_database", return_value=mock_db):
             with patch("src.cli.utils.get_settings") as mock_settings:
                 mock_settings.return_value.database_url = "sqlite:///test.db"
                 result = await get_initialized_database()
@@ -155,9 +151,8 @@ class TestGetInitializedDatabase:
     async def test_get_initialized_database_error(self):
         """Test database initialization error handling."""
         mock_db = AsyncMock()
-        mock_db.initialize.side_effect = Exception("Initialization failed")
 
-        with patch("src.cli.utils.DatabaseManager", return_value=mock_db):
+        with patch("src.cli.utils.init_database", side_effect=Exception("Initialization failed")):
             with pytest.raises(Exception):
                 await get_initialized_database()
 
