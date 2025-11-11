@@ -27,47 +27,75 @@ REDACTED_PLACEHOLDER = "[REDACTED_{type}]"
 
 # Patterns for detecting secrets
 SECRET_PATTERNS = {
-    # API keys and tokens
+    # API keys and tokens (with and without key names)
     "api_key": [
-        r"['\"]?(?:api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]{20,})['\"]?",
-        r"['\"]?(?:key)['\"]?\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]{32,})['\"]?",
+        # Stripe-style keys (anchored - for standalone values)
+        r"^sk_(?:live|test)_[a-zA-Z0-9]{16,}$",
+        r"^pk_(?:live|test)_[a-zA-Z0-9]{16,}$",
+        # Stripe-style keys (non-anchored - for embedded in JSON/strings)
+        r"sk_(?:live|test)_[a-zA-Z0-9]{16,}",
+        r"pk_(?:live|test)_[a-zA-Z0-9]{16,}",
+        # Generic API keys (standalone, must be long to avoid false positives)
+        r"^[a-zA-Z0-9_\-]{24,}$",
+        # Key-value patterns (can be shorter since key name provides context)
+        r"(?:api[_-]?key|apikey)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]{16,})['\"]?",
+        r"['\"](?:api[_-]?key|secret[_-]?key)['\"]?\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]{16,})['\"]?",
     ],
     "auth_token": [
-        r"['\"]?(?:auth[_-]?token|token)['\"]?\s*[:=]\s*['\"]?([a-zA-Z0-9_\-\.]{20,})['\"]?",
-        r"Bearer\s+([a-zA-Z0-9_\-\.]{20,})",
+        # Standalone Bearer tokens
+        r"Bearer\s+[a-zA-Z0-9_\-\.]{20,}",
+        # Key-value patterns (shorter minimum since we have key context)
+        r"['\"]?(?:auth[_-]?token|token)['\"]?\s*[:=]\s*['\"]?([a-zA-Z0-9_\-\.]{6,})['\"]?",
     ],
     "jwt_token": [
+        # JWT format (standalone)
         r"eyJ[a-zA-Z0-9_\-]+\.eyJ[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+",
     ],
     "password": [
+        # Key-value patterns
         r"['\"]?(?:password|passwd|pwd)['\"]?\s*[:=]\s*['\"]?([^\s'\"]{6,})['\"]?",
     ],
     "connection_string": [
-        r"(?:mysql|postgresql|mongodb|redis|sqlite)://[^:]+:([^@]+)@",
-        r"(?:Server|HOST)=[^;]+;(?:Database|DB)=[^;]+;(?:User ID|UID)=[^;]+;(?:Password|PWD)=([^;]+)",
+        # Database connection strings with credentials (username optional)
+        r"(?:mysql|postgresql|mongodb|redis|sqlite)://[^:]*:[^@]+@",
+        r"(?:Server|HOST)=[^;]+;(?:Database|DB)=[^;]+;(?:User ID|UID)=[^;]+;(?:Password|PWD)=[^;]+",
     ],
     "aws_key": [
-        r"AKIA[0-9A-Z]{16}",
+        # AWS Access Key ID (standalone)
+        r"^AKIA[0-9A-Z]{16}$",
+        # AWS Secret Access Key (standalone, 40 chars base64)
+        r"^[A-Za-z0-9/+=]{40}$",
+        # Key-value patterns
         r"['\"]?(?:aws[_-]?access[_-]?key[_-]?id)['\"]?\s*[:=]\s*['\"]?([A-Z0-9]{20})['\"]?",
         r"['\"]?(?:aws[_-]?secret[_-]?access[_-]?key)['\"]?\s*[:=]\s*['\"]?([A-Za-z0-9/+=]{40})['\"]?",
     ],
     "azure_key": [
+        # Key-value patterns
         r"['\"]?(?:azure[_-]?key|azure[_-]?credential)['\"]?\s*[:=]\s*['\"]?([a-zA-Z0-9+/=]{40,})['\"]?",
     ],
     "ssh_key": [
+        # SSH private key markers
         r"-----BEGIN (?:RSA |DSA |EC |OPENSSH )?PRIVATE KEY-----",
     ],
     "certificate": [
+        # Certificate markers
         r"-----BEGIN CERTIFICATE-----",
     ],
 }
 
 # Keywords that suggest a value might be sensitive
 SENSITIVE_KEYWORDS = {
-    "password", "passwd", "pwd", "secret", "token", "key", "api_key", "apikey",
+    "password", "passwd", "pwd", "secret", "token", "api_key", "apikey",
     "auth", "credential", "credentials", "private", "access", "session",
     "oauth", "bearer", "jwt", "certificate", "cert", "pem", "ssh",
     "connection", "conn_str", "database_url", "db_url",
+    "private_key", "secret_key", "access_key",  # Compound key forms
+}
+
+# Keywords that suggest a value contains a path
+PATH_KEYWORDS = {
+    "path", "dir", "directory", "folder", "file", "location",
+    "command", "executable", "binary", "working_directory", "home",
 }
 
 # Path patterns that may contain PII
@@ -152,8 +180,12 @@ def _sanitize_string(
                 return REDACTED_PLACEHOLDER.format(type=secret_type.upper())
 
     # Check for PII in paths
-    if context == "path" or (key and "path" in key.lower()):
+    if context == "path" or (key and any(kw in key.lower() for kw in PATH_KEYWORDS)):
         value = _sanitize_path(value)
+    # Also check if value looks like a path (contains slashes and common path markers)
+    elif "/" in value or "\\" in value:
+        if any(marker in value for marker in ["/Users/", "/home/", "C:\\Users\\", "/usr/"]):
+            value = _sanitize_path(value)
 
     return value
 
@@ -317,34 +349,3 @@ def is_likely_secret(value: str, key: Optional[str] = None) -> bool:
                 return True
 
     return False
-
-
-# Example usage and testing
-if __name__ == "__main__":
-    # Configure logging for testing
-    logging.basicConfig(level=logging.DEBUG)
-
-    # Test cases
-    test_data = {
-        "server_name": "test-server",
-        "command": "node /Users/john/projects/server.js",
-        "api_key": "sk_live_1234567890abcdefghijklmnop",
-        "password": "mySecretPassword123",
-        "connection_string": "postgresql://user:password123@localhost:5432/db",
-        "env": {
-            "API_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U",
-            "DEBUG": "true",
-            "TIMEOUT": "30",
-        },
-        "config": {
-            "aws_access_key_id": "AKIAIOSFODNN7EXAMPLE",
-            "aws_secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-            "max_retries": 3,
-        }
-    }
-
-    print("Original data:")
-    print(test_data)
-    print("\nSanitized data:")
-    sanitized = sanitize_config(test_data)
-    print(sanitized)

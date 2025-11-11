@@ -11,6 +11,7 @@
 - **[README.md](./README.md)** - Project overview and quick start
 - **[API Testing Guide](./API-TESTING-GUIDE.md)** - How to test the API
 - **[API Quick Reference](./phase-5-quick-reference.md)** - Quick API reference
+- **[MCP API Reference](./API-REFERENCE-MCP.md)** - MCP Server endpoints documentation
 
 ### 📋 Planning & Architecture
 - **[Production Upgrade Plan](./planning-production-upgrade-architecture.md)** - Main planning document
