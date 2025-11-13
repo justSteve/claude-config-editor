@@ -8,9 +8,12 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.core.config import get_settings
 from src.core.database import init_database, close_database
@@ -114,8 +117,24 @@ def create_app() -> FastAPI:
     # Add routes
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
-        """Redirect root to API documentation."""
-        return RedirectResponse(url="/docs")
+        """Redirect root to legacy UI."""
+        return RedirectResponse(url="/ui")
+
+    @app.get("/ui", include_in_schema=False)
+    async def legacy_ui() -> FileResponse:
+        """Serve the legacy config editor UI."""
+        index_path = Path(__file__).parent.parent.parent / "index.html"
+        if not index_path.exists():
+            return RedirectResponse(url="/docs")
+        return FileResponse(index_path)
+
+    @app.get("/snapshots", include_in_schema=False)
+    async def snapshot_viewer() -> FileResponse:
+        """Serve the snapshot viewer UI."""
+        snapshots_path = Path(__file__).parent.parent.parent / "snapshots.html"
+        if not snapshots_path.exists():
+            return RedirectResponse(url="/docs")
+        return FileResponse(snapshots_path)
 
     @app.get("/health", tags=["Health"])
     async def health_check() -> dict[str, str]:
@@ -132,10 +151,12 @@ def create_app() -> FastAPI:
         }
 
     # Include routers
-    from src.api.routes import snapshots, claude_config, paths, mcp
+    from src.api.routes import snapshots as snapshots_routes
+    from src.api.routes import claude_config, paths, mcp, legacy
 
+    # v2.0 API routers
     app.include_router(
-        snapshots.router,
+        snapshots_routes.router,
         prefix="/api/v1",
         tags=["Snapshots"],
     )
@@ -156,6 +177,13 @@ def create_app() -> FastAPI:
         mcp.router,
         prefix="/api/v1",
         tags=["MCP Servers"],
+    )
+
+    # Legacy UI API endpoints (v1.0 compatibility)
+    app.include_router(
+        legacy.router,
+        prefix="/api",
+        tags=["Legacy UI"],
     )
 
     # TODO: Add more routers as they're implemented
