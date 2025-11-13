@@ -255,6 +255,42 @@ A: Yes! Python is cross-platform. Works on macOS, Linux, Windows.
 
 ---
 
+## 🐳 Container-Based Development (NEW!)
+
+**Eliminate environment friction between you and AI agents!**
+
+Problem: Agent tests code in one environment, you run it in another → friction.
+
+**Solution: Containerized development with perfect reproducibility.**
+
+### Quick Setup (One-Time)
+
+```cmd
+# Install Docker Desktop, then:
+setup-dev-env.bat
+```
+
+### Daily Usage
+
+```cmd
+# Run any command in the container
+runin "pytest"
+runin "python -m src.cli.commands snapshot list"
+
+# Or enter the container
+docker exec -it claude-config-dev bash
+```
+
+**Benefits:**
+- ✅ Agent and your code run in **identical** environments
+- ✅ Locked Python version and dependencies
+- ✅ No "works on my machine" issues
+- ✅ Clean separation from your local environment
+
+📖 **Full Documentation:** [docs/CONTAINER-DEVELOPMENT.md](docs/CONTAINER-DEVELOPMENT.md)
+
+---
+
 ## 🤝 Contributing
 
 **Found a bug?** Open an issue.

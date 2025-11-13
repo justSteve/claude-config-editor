@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Main development environment
+  dev-env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-config-dev
+    image: claude-config-editor:dev
+
+    # Volume mounts for live code editing
+    volumes:
+      # Source code (read-write for development)
+      - ./src:/workspace/src
+      - ./tests:/workspace/tests
+      - ./docs:/workspace/docs
+
+      # Configuration files
+      - ./pyproject.toml:/workspace/pyproject.toml:ro
+      - ./requirements.txt:/workspace/requirements.txt:ro
+      - ./requirements-dev.txt:/workspace/requirements-dev.txt:ro
+
+      # Data persistence
+      - ./data:/workspace/data
+      - ./logs:/workspace/logs
+
+      # Static web files
+      - ./index.html:/workspace/index.html
+      - ./snapshots.html:/workspace/snapshots.html
+      - ./start_api.bat:/workspace/start_api.bat
+
+      # Git configuration (read-only)
+      - ~/.gitconfig:/home/developer/.gitconfig:ro
+
+      # Preserve bash history
+      - dev-bash-history:/home/developer/.bash_history
+
+    # Port mappings
+    ports:
+      - "8765:8765"  # API server
+
+    # Environment variables
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///workspace/data/claude_config.db
+      - LOG_LEVEL=INFO
+      - LOG_FILE=/workspace/logs/app.log
+      - PYTHONPATH=/workspace
+
+    # Networking
+    networks:
+      - claude-net
+
+    # Keep container running
+    command: tail -f /dev/null
+
+    # Restart policy
+    restart: unless-stopped
+
+  # API server (can be started separately)
+  api:
+    extends: dev-env
+    container_name: claude-config-api
+    command: uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8765
+    depends_on:
+      - dev-env
+    profiles:
+      - api
+
+volumes:
+  # Persistent volume for bash history
+  dev-bash-history:
+
+networks:
+  claude-net:
+    driver: bridge
