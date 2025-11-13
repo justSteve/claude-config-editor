@@ -370,12 +370,55 @@
             display: flex;
             gap: 5px;
         }
+
+        header {
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin-bottom: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            background: #1e1e1e;
+            color: #4ec9b0;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            border: 1px solid #3e3e42;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background: #2d2d30;
+            border-color: #4ec9b0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Claude Config Editor</h1>
-        <p style="color: #858585; margin-bottom: 20px;">Web-based editor for Claude Code configuration</p>
+        <header>
+            <div>
+                <h1>🔧 Claude Config Editor</h1>
+                <p style="color: #858585; margin-top: 5px;">Web-based editor for Claude Code configuration</p>
+            </div>
+            <div class="nav-links">
+                <a href="/snapshots">📸 Snapshot Viewer</a>
+                <a href="/docs">📚 API Docs</a>
+            </div>
+        </header>
 
         <div class="config-path">
             📁 Config: <span id="config-path">Loading...</span>

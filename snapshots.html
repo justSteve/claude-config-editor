@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snapshot Viewer - Claude Config Version Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: #4ec9b0;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #858585;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            background: #1e1e1e;
+            color: #4ec9b0;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            border: 1px solid #3e3e42;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            background: #2d2d30;
+            border-color: #4ec9b0;
+        }
+
+        .controls {
+            background: #252526;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #1177bb;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #3e3e42;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #252526;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4ec9b0;
+        }
+
+        .stat-label {
+            color: #858585;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ec9b0;
+        }
+
+        .snapshots-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .snapshot-card {
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #3e3e42;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .snapshot-card:hover {
+            border-color: #4ec9b0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .snapshot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .snapshot-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ec9b0;
+        }
+
+        .snapshot-time {
+            color: #858585;
+            font-size: 12px;
+        }
+
+        .snapshot-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .detail-icon {
+            font-size: 16px;
+        }
+
+        .snapshot-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            background: #1e1e1e;
+            color: #4ec9b0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid #4ec9b0;
+        }
+
+        .snapshot-notes {
+            color: #858585;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .changes-badge {
+            background: #d16969;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .no-changes-badge {
+            background: #608b4e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #858585;
+        }
+
+        .error {
+            background: #d16969;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #252526;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            color: #4ec9b0;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #d4d4d4;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4ec9b0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: #3e3e42;
+        }
+
+        .btn-secondary:hover {
+            background: #4e4e52;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>📸 Snapshot Viewer</h1>
+                <p class="subtitle">Claude Config Version Control System</p>
+            </div>
+            <div class="nav-links">
+                <a href="/ui">🔧 Config Editor</a>
+                <a href="/docs">📚 API Docs</a>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button onclick="createSnapshot()">➕ Create Snapshot</button>
+            <button onclick="refreshSnapshots()">🔄 Refresh</button>
+            <span style="margin-left: auto; color: #858585; font-size: 13px;">
+                <span id="status">Ready</span>
+            </span>
+        </div>
+
+        <div id="error-container"></div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Snapshots</div>
+                <div class="stat-value" id="total-snapshots">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Storage</div>
+                <div class="stat-value" id="total-storage">0 MB</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Latest Snapshot</div>
+                <div class="stat-value" id="latest-snapshot">--</div>
+            </div>
+        </div>
+
+        <div id="snapshots-container" class="loading">
+            Loading snapshots...
+        </div>
+    </div>
+
+    <!-- Create Snapshot Modal -->
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Create New Snapshot</div>
+            <form id="create-form" onsubmit="submitSnapshot(event)">
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea id="notes" placeholder="Describe what this snapshot captures..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tags">Tags (comma-separated, optional)</label>
+                    <input type="text" id="tags" placeholder="production, backup, before-cleanup">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" id="submit-btn">Create Snapshot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let snapshots = [];
+
+        async function loadSnapshots() {
+            try {
+                setStatus('Loading snapshots...');
+                const response = await fetch('/api/v1/snapshots?page=1&page_size=50&sort_by=snapshot_time&sort_order=desc');
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load snapshots: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                snapshots = data.items || [];
+
+                updateStats(data);
+                renderSnapshots();
+                setStatus('Ready');
+                clearError();
+            } catch (error) {
+                console.error('Error loading snapshots:', error);
+                showError('Failed to load snapshots: ' + error.message);
+                setStatus('Error');
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('total-snapshots').textContent = data.total || 0;
+
+            const totalGB = ((data.total_size_all_bytes || 0) / (1024 * 1024 * 1024)).toFixed(2);
+            document.getElementById('total-storage').textContent = totalGB + ' GB';
+
+            if (data.items && data.items.length > 0) {
+                const latest = new Date(data.items[0].snapshot_time);
+                document.getElementById('latest-snapshot').textContent = latest.toLocaleDateString();
+            }
+        }
+
+        function renderSnapshots() {
+            const container = document.getElementById('snapshots-container');
+
+            if (snapshots.length === 0) {
+                container.innerHTML = '<div class="loading">No snapshots found. Create your first snapshot!</div>';
+                return;
+            }
+
+            container.className = 'snapshots-grid';
+            container.innerHTML = snapshots.map(snapshot => `
+                <div class="snapshot-card" onclick="viewSnapshot(${snapshot.id})">
+                    <div class="snapshot-header">
+                        <div>
+                            <div class="snapshot-id">Snapshot #${snapshot.id}</div>
+                            <div class="snapshot-time">${formatDate(snapshot.snapshot_time)}</div>
+                        </div>
+                        <div>
+                            ${snapshot.changed_from_previous > 0
+                                ? `<span class="changes-badge">${snapshot.changed_from_previous} changes</span>`
+                                : '<span class="no-changes-badge">No changes</span>'
+                            }
+                        </div>
+                    </div>
+
+                    <div class="snapshot-details">
+                        <div class="detail-item">
+                            <span class="detail-icon">📁</span>
+                            <span>${snapshot.files_found} files</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-icon">📂</span>
+                            <span>${snapshot.directories_found} dirs</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-icon">💾</span>
+                            <span>${formatBytes(snapshot.total_size_bytes)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-icon">🔹</span>
+                            <span>${snapshot.trigger_type || 'manual'}</span>
+                        </div>
+                    </div>
+
+                    ${snapshot.tags && snapshot.tags.length > 0 ? `
+                        <div class="snapshot-tags">
+                            ${snapshot.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+
+                    ${snapshot.notes ? `
+                        <div class="snapshot-notes">"${snapshot.notes}"</div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function viewSnapshot(id) {
+            window.location.href = `/docs#/Snapshots/get_snapshot_by_id_api_v1_snapshots__snapshot_id__get`;
+        }
+
+        function createSnapshot() {
+            document.getElementById('create-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('create-modal').classList.remove('active');
+            document.getElementById('create-form').reset();
+        }
+
+        async function submitSnapshot(event) {
+            event.preventDefault();
+
+            const notes = document.getElementById('notes').value;
+            const tagsInput = document.getElementById('tags').value;
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                setStatus('Creating snapshot...');
+
+                const response = await fetch('/api/v1/snapshots', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        trigger_type: 'manual',
+                        triggered_by: 'web-ui',
+                        notes: notes || null,
+                        tags: tags.length > 0 ? tags : null
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create snapshot');
+                }
+
+                const result = await response.json();
+                console.log('Snapshot created:', result);
+
+                closeModal();
+                await loadSnapshots();
+                setStatus('Snapshot created successfully!');
+
+                setTimeout(() => setStatus('Ready'), 3000);
+            } catch (error) {
+                console.error('Error creating snapshot:', error);
+                showError('Failed to create snapshot: ' + error.message);
+                setStatus('Error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Snapshot';
+            }
+        }
+
+        function refreshSnapshots() {
+            loadSnapshots();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function setStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error">❌ ${message}</div>`;
+        }
+
+        function clearError() {
+            document.getElementById('error-container').innerHTML = '';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Load snapshots on page load
+        window.addEventListener('DOMContentLoaded', loadSnapshots);
+    </script>
+</body>
+</html>

@@ -54,3 +54,4 @@ test_*.json
 .pytest_cache/
 .coverage
 htmlcov/
+nul
