@@ -121,6 +121,83 @@
             border-bottom: 2px solid #4ec9b0;
         }
 
+        .snapshot-item {
+            background: #2d2d30;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4ec9b0;
+            transition: all 0.2s;
+        }
+
+        .snapshot-item:hover {
+            background: #333333;
+            transform: translateX(4px);
+        }
+
+        .snapshot-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .snapshot-id {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4ec9b0;
+        }
+
+        .snapshot-time {
+            color: #858585;
+            font-size: 12px;
+        }
+
+        .snapshot-details-row {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #d4d4d4;
+        }
+
+        .snapshot-notes {
+            color: #858585;
+            font-style: italic;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .changes-badge {
+            background: #d16969;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .no-changes-badge {
+            background: #608b4e;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #858585;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox-label:hover {
+            color: #d4d4d4;
+        }
+
         .tab-content {
             display: none;
         }
@@ -434,6 +511,10 @@
             <button class="success" onclick="saveConfig()" id="save-btn" disabled>💾 Save Changes</button>
             <button onclick="reloadConfig()">🔄 Reload</button>
             <button onclick="createBackup()">📦 Backup</button>
+            <label class="checkbox-label" title="Create a v2 snapshot before saving changes">
+                <input type="checkbox" id="snapshot-before-save" checked>
+                📸 Snapshot before save
+            </label>
             <div style="flex: 1;"></div>
             <div style="color: #858585; font-size: 12px;">
                 Last saved: <span id="last-save">never</span>
@@ -446,6 +527,7 @@
             <button class="tab active" onclick="switchTab('overview')">📊 Overview</button>
             <button class="tab" onclick="switchTab('projects')">📁 Project History</button>
             <button class="tab" onclick="switchTab('mcp')">🔌 MCP Servers</button>
+            <button class="tab" onclick="switchTab('snapshots')">📸 Snapshots</button>
             <button class="tab" onclick="switchTab('paths')">🗂️ System Paths</button>
             <button class="tab" onclick="switchTab('raw')">📝 Raw JSON</button>
         </div>
@@ -526,6 +608,36 @@
             </div>
         </div>
 
+        <!-- Snapshots Tab (v2 Integration) -->
+        <div id="tab-snapshots" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2>📸 Config Snapshots <span class="badge" id="snapshots-badge">0</span></h2>
+                    <div>
+                        <button onclick="createSnapshotPrompt()">➕ Create Snapshot</button>
+                        <button onclick="loadSnapshots()">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Snapshots</div>
+                        <div class="stat-value" id="snapshot-total">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Storage Used</div>
+                        <div class="stat-value" id="snapshot-storage">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Latest</div>
+                        <div class="stat-value" id="snapshot-latest">-</div>
+                    </div>
+                </div>
+                <div id="snapshots-list">
+                    <div class="no-data">Loading snapshots...</div>
+                </div>
+            </div>
+        </div>
+
         <!-- System Paths Tab -->
         <div id="tab-paths" class="tab-content">
             <div class="section">
@@ -571,6 +683,7 @@
     <script>
         let config = null;
         let projects = [];
+        let snapshots = [];
         let sortColumn = 'size';
         let sortDirection = 'desc';
         let hasChanges = false;
@@ -578,6 +691,8 @@
         window.addEventListener('DOMContentLoaded', async () => {
             await loadAvailableConfigs();
             await loadConfig();
+            // Try to load snapshots (v2 API may not be available)
+            loadSnapshots().catch(() => {});
         });
 
         async function loadAvailableConfigs() {
@@ -1189,6 +1304,32 @@
             saveBtn.textContent = '⏳ Saving...';
 
             try {
+                // Create snapshot before saving if checkbox is checked
+                const snapshotBeforeSave = document.getElementById('snapshot-before-save').checked;
+                if (snapshotBeforeSave) {
+                    saveBtn.textContent = '📸 Creating snapshot...';
+                    try {
+                        const snapshotResponse = await fetch('/api/v1/snapshots', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                trigger_type: 'pre-save',
+                                triggered_by: 'web-ui',
+                                notes: 'Snapshot before config save'
+                            })
+                        });
+
+                        if (snapshotResponse.ok) {
+                            const snapshotResult = await snapshotResponse.json();
+                            console.log('Pre-save snapshot created:', snapshotResult.id);
+                        }
+                    } catch (snapshotError) {
+                        console.log('Snapshot not available:', snapshotError.message);
+                        // Continue with save even if snapshot fails
+                    }
+                    saveBtn.textContent = '⏳ Saving...';
+                }
+
                 const response = await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1203,6 +1344,9 @@
                     document.getElementById('last-save').textContent = now;
                     showMessage('✅ Config saved! Restart Claude Code to apply changes.', 'success');
                     saveBtn.textContent = '💾 Saved';
+
+                    // Refresh snapshots list
+                    loadSnapshots().catch(() => {});
                 } else {
                     throw new Error(result.error);
                 }
@@ -1246,6 +1390,125 @@
             setTimeout(() => {
                 messageArea.innerHTML = '';
             }, 5000);
+        }
+
+        // ========================================
+        // Snapshot Functions (v2 API Integration)
+        // ========================================
+
+        async function loadSnapshots() {
+            try {
+                const response = await fetch('/api/v1/snapshots?page=1&page_size=20&sort_by=snapshot_time&sort_order=desc');
+
+                if (!response.ok) {
+                    throw new Error('v2 API not available');
+                }
+
+                const data = await response.json();
+                snapshots = data.items || [];
+
+                // Update stats
+                document.getElementById('snapshot-total').textContent = data.total || 0;
+                document.getElementById('snapshots-badge').textContent = data.total || 0;
+
+                const storageMB = ((data.total_size_all_bytes || 0) / (1024 * 1024)).toFixed(1);
+                document.getElementById('snapshot-storage').textContent = storageMB + ' MB';
+
+                if (snapshots.length > 0) {
+                    const latest = new Date(snapshots[0].snapshot_time);
+                    document.getElementById('snapshot-latest').textContent = latest.toLocaleDateString();
+                } else {
+                    document.getElementById('snapshot-latest').textContent = 'None';
+                }
+
+                renderSnapshots();
+            } catch (error) {
+                console.log('Snapshots not available:', error.message);
+                document.getElementById('snapshots-list').innerHTML = `
+                    <div class="warning">
+                        <strong>v2 API not available</strong><br>
+                        Start the FastAPI server with: <code>python -m src.api.app</code><br>
+                        Or use <code>runin "python -m src.api.app"</code> in Docker container.
+                    </div>
+                `;
+                document.getElementById('snapshot-total').textContent = '-';
+                document.getElementById('snapshot-storage').textContent = '-';
+                document.getElementById('snapshot-latest').textContent = '-';
+            }
+        }
+
+        function renderSnapshots() {
+            const container = document.getElementById('snapshots-list');
+
+            if (snapshots.length === 0) {
+                container.innerHTML = '<div class="no-data">No snapshots yet. Create your first snapshot!</div>';
+                return;
+            }
+
+            container.innerHTML = snapshots.map(snapshot => `
+                <div class="snapshot-item">
+                    <div class="snapshot-header-row">
+                        <div>
+                            <div class="snapshot-id">Snapshot #${snapshot.id}</div>
+                            <div class="snapshot-time">${formatSnapshotDate(snapshot.snapshot_time)}</div>
+                        </div>
+                        <div>
+                            ${snapshot.changed_from_previous > 0
+                                ? `<span class="changes-badge">${snapshot.changed_from_previous} changes</span>`
+                                : '<span class="no-changes-badge">No changes</span>'
+                            }
+                        </div>
+                    </div>
+                    <div class="snapshot-details-row">
+                        <span>📁 ${snapshot.files_found} files</span>
+                        <span>📂 ${snapshot.directories_found} dirs</span>
+                        <span>💾 ${formatSize(snapshot.total_size_bytes)}</span>
+                        <span>🔹 ${snapshot.trigger_type || 'manual'}</span>
+                    </div>
+                    ${snapshot.notes ? `<div class="snapshot-notes">"${escapeHtml(snapshot.notes)}"</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function formatSnapshotDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function createSnapshotPrompt() {
+            const notes = prompt('Snapshot notes (optional):');
+            if (notes === null) return; // Cancelled
+
+            try {
+                showMessage('Creating snapshot...', 'success');
+
+                const response = await fetch('/api/v1/snapshots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        trigger_type: 'manual',
+                        triggered_by: 'web-ui',
+                        notes: notes || null
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create snapshot');
+                }
+
+                const result = await response.json();
+                showMessage(`Snapshot #${result.id} created successfully!`, 'success');
+                await loadSnapshots();
+            } catch (error) {
+                showMessage('Error creating snapshot: ' + error.message, 'error');
+            }
         }
     </script>
 </body>

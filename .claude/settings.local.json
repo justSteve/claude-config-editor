@@ -1,31 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat:*)",
-      "Bash(python windows_scan.py:*)",
-      "Bash(echo:*)",
-      "Bash(python:*)",
-      "Bash(curl:*)",
-      "Bash(git remote:*)",
-      "Bash(git add:*)",
-      "Bash(.venv/Scripts/python.exe:*)",
-      "Bash(git push:*)",
-      "Bash(sqlite3:*)",
-      "Bash(git commit:*)",
-      "Skill(superpowers:brainstorming)",
-      "Bash(start comprehensive_report.html)",
-      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)",
-      "Skill(superpowers:using-superpowers)",
-      "Skill(superpowers:executing-plans)",
-      "Bash(server.py)",
-      "Bash(start_api.bat)",
-      "Bash(cmd //c start http://localhost:8765/ui)",
-      "Bash(cmd //c taskkill //PID 23252 //F)",
-      "Bash(cmd //c taskkill //PID 25164 //F)",
-      "Bash(netstat:*)",
-      "Bash(findstr:*)",
-      "Bash(cmd //c taskkill //PID 16088 //F)",
-      "Bash(gh issue view:*)"
+      "Bash(dir:*)",
+      "Bash(git mv:*)"
     ],
     "deny": [],
     "ask": []

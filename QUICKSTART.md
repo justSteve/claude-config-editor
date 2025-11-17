@@ -2,41 +2,133 @@
 
 ## Overview
 
-Claude Config Editor v2.0 is a production-grade version control system for Claude Code and Claude Desktop configurations. It provides git-like snapshot management with complete history tracking, deduplication, and change detection.
+Claude Config Editor captures **point-in-time snapshots of your Claude configuration files** across 17 locations:
 
-## Installation
+- `.claude.json` (conversation histories, MCP servers)
+- `settings.json` (user/project/enterprise settings)
+- `CLAUDE.md` files (memory/instructions)
+- MCP server configs
+- Slash commands
+- Desktop logs
 
-### 1. Clone or Update Repository
+This enables you to track how your Claude configurations evolve over time, detect what changed between sessions, and restore previous states.
 
-```bash
+## Prerequisites
+
+- **Docker Desktop** installed and running
+  - Download: <https://www.docker.com/products/docker-desktop>
+- **Git** for version control
+
+## Installation (One-Time Setup)
+
+```cmd
+# 1. Clone repository
 git clone https://github.com/justSteve/claude-config-editor.git
 cd claude-config-editor
+
+# 2. Build and start development container
+setup-dev-env.bat
 ```
 
-### 2. Create Virtual Environment
+This creates a containerized environment with:
 
-```bash
-python -m venv .venv
+- Python 3.11.7 (exact version locked)
+- All dependencies pre-installed
+- Identical environment for you and AI agents
+- Persistent SQLite database for config snapshots
+
+## Daily Workflow
+
+### Start Your Session
+
+```cmd
+session-start.bat
 ```
 
-### 3. Activate Virtual Environment
+This automated script:
 
-**Windows:**
-```bash
-.venv\Scripts\activate
+1. Starts Docker container (if not running)
+2. Shows last 5 git commits (project code changes)
+3. Displays last commit details
+4. Shows working tree status
+5. **Creates Claude config snapshot** (captures current state of all 17 config locations)
+6. Runs test suite health check
+
+**Example output:**
+
+```text
+[1/5] LAST SESSION SUMMARY
+----------------------------------------
+e5b405a restored legacy function
+ac87d0b feat(docker): Add containerized development environment
+
+[4/5] CREATING BASELINE SNAPSHOT
+----------------------------------------
+Snapshot #42 created successfully
+  - Scanned 17 configuration locations
+  - Found 12 files (3 new, 2 modified since last snapshot)
+  - Deduplicated storage: 97% savings
 ```
 
-**Linux/Mac:**
-```bash
-source .venv/bin/activate
+### During Development
+
+```cmd
+# Run any command in the container
+runin "pytest"
+runin "python -m src.cli.commands snapshot list"
+runin "python -m src.api.app"
+
+# Enter container shell for interactive work
+docker exec -it claude-config-dev bash
+
+# Create config snapshot after Claude settings change
+runin "python -m src.cli.commands snapshot create --notes 'Added new MCP server'"
+
+# See what changed in your Claude configs
+runin "python -m src.cli.commands snapshot show LATEST --changes"
 ```
 
-### 4. Install Dependencies
+### End Your Session
 
-```bash
-pip install -r requirements.txt
-pip install -e .
+```cmd
+session-end.bat
 ```
+
+This automated script:
+
+1. **Creates final Claude config snapshot** with your summary
+2. Shows working tree status (git)
+3. Guides commit workflow (optional)
+4. Prompts for next-steps documentation
+5. Saves notes to `SESSION_NOTES.md`
+
+## Quick Reference
+
+| Command | Description |
+|---------|-------------|
+| `session-start.bat` | Initialize session, snapshot configs |
+| `session-end.bat` | Final config snapshot, commit code |
+| `runin "command"` | Execute command in container |
+| `docker-compose down` | Stop container |
+| `docker-compose up -d dev-env` | Start container |
+
+## What Are Config Snapshots?
+
+**Config snapshots capture your Claude configuration files** - NOT your project code (that's git).
+
+Each snapshot stores:
+
+- Complete file contents from 17 config locations
+- SHA256 hashes for deduplication
+- Timestamps and metadata
+- Change detection from previous snapshot
+
+**Use cases:**
+
+- "What MCP servers did I have configured last week?"
+- "Why is my .claude.json suddenly 15MB?"
+- "Which CLAUDE.md file changed my agent's behavior?"
+- "Restore my settings from before I broke something"
 
 ## Basic Usage
 
@@ -156,7 +248,22 @@ The system tracks 17 configuration locations across 7 categories:
 - Type hints and documentation
 - Error handling throughout
 
-## Example Workflow
+## Automated Session Management
+
+The daily workflow is automated via `session-start.bat` and `session-end.bat` (see [Daily Workflow](#daily-workflow) above).
+
+These scripts handle:
+
+- Environment initialization
+- Git history review
+- Snapshot creation
+- Test verification
+- Commit workflow
+- Next-steps documentation
+
+---
+
+## Example Workflows
 
 ### Daily Backup
 
