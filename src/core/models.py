@@ -94,6 +94,18 @@ class Snapshot(Base):
     annotations: Mapped[list["Annotation"]] = relationship(
         "Annotation", back_populates="snapshot", cascade="all, delete-orphan"
     )
+    mcp_server_snapshots: Mapped[list["McpServerSnapshot"]] = relationship(
+        "McpServerSnapshot", back_populates="snapshot", cascade="all, delete-orphan"
+    )
+    subagent_snapshots: Mapped[list["SubagentSnapshot"]] = relationship(
+        "SubagentSnapshot", back_populates="snapshot", cascade="all, delete-orphan"
+    )
+    slash_command_snapshots: Mapped[list["SlashCommandSnapshot"]] = relationship(
+        "SlashCommandSnapshot", back_populates="snapshot", cascade="all, delete-orphan"
+    )
+    claude_memory_snapshots: Mapped[list["ClaudeMemorySnapshot"]] = relationship(
+        "ClaudeMemorySnapshot", back_populates="snapshot", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Snapshot(id={self.id}, time={self.snapshot_time}, hash={self.snapshot_hash[:8]}...)>"
@@ -153,6 +165,15 @@ class FileContent(Base):
     # Relationships
     paths: Mapped[list["SnapshotPath"]] = relationship(
         "SnapshotPath", back_populates="content"
+    )
+    subagent_refs: Mapped[list["SubagentSnapshot"]] = relationship(
+        back_populates="content"
+    )
+    command_refs: Mapped[list["SlashCommandSnapshot"]] = relationship(
+        back_populates="content"
+    )
+    memory_refs: Mapped[list["ClaudeMemorySnapshot"]] = relationship(
+        back_populates="content"
     )
 
     def __repr__(self) -> str:
@@ -313,6 +334,146 @@ class McpServer(Base):
 
     def __repr__(self) -> str:
         return f"<McpServer(name={self.server_name}, command={self.command})>"
+
+
+class McpServerSnapshot(Base):
+    """
+    MCP server configuration at a specific snapshot time.
+    Denormalized for efficient querying by entity name across snapshots.
+    """
+
+    __tablename__ = "mcp_server_snapshots"
+    __table_args__ = (
+        Index("idx_snapshot_server", "snapshot_id", "server_name"),
+        Index("idx_server_name", "server_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    snapshot_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("snapshots.id", ondelete="CASCADE"), nullable=False
+    )
+    server_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    command: Mapped[str] = mapped_column(String(512), nullable=False)
+    args_json: Mapped[str] = mapped_column(Text, nullable=False)  # JSON array
+    env_json: Mapped[str] = mapped_column(Text, nullable=False)  # JSON object
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    config_file_path: Mapped[Optional[str]] = mapped_column(
+        String(512), nullable=True
+    )
+
+    # Relationships
+    snapshot: Mapped["Snapshot"] = relationship(back_populates="mcp_server_snapshots")
+
+    def __repr__(self) -> str:
+        return f"<McpServerSnapshot(server={self.server_name}, snapshot={self.snapshot_id})>"
+
+
+class SubagentSnapshot(Base):
+    """
+    Subagent configuration at a specific snapshot time.
+    Content is deduplicated via FileContent reference.
+    """
+
+    __tablename__ = "subagent_snapshots"
+    __table_args__ = (
+        Index("idx_snapshot_agent", "snapshot_id", "agent_name"),
+        Index("idx_agent_name", "agent_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    snapshot_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("snapshots.id", ondelete="CASCADE"), nullable=False
+    )
+    agent_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("file_contents.id"), nullable=True
+    )
+    config_file_path: Mapped[Optional[str]] = mapped_column(
+        String(512), nullable=True
+    )
+
+    # Relationships
+    snapshot: Mapped["Snapshot"] = relationship(back_populates="subagent_snapshots")
+    content: Mapped[Optional["FileContent"]] = relationship(
+        back_populates="subagent_refs"
+    )
+
+    def __repr__(self) -> str:
+        return f"<SubagentSnapshot(agent={self.agent_name}, snapshot={self.snapshot_id})>"
+
+
+class SlashCommandSnapshot(Base):
+    """
+    Slash command configuration at a specific snapshot time.
+    Content is deduplicated via FileContent reference.
+    """
+
+    __tablename__ = "slash_command_snapshots"
+    __table_args__ = (
+        Index("idx_snapshot_command", "snapshot_id", "command_name"),
+        Index("idx_command_name", "command_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    snapshot_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("snapshots.id", ondelete="CASCADE"), nullable=False
+    )
+    command_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("file_contents.id"), nullable=True
+    )
+    config_file_path: Mapped[Optional[str]] = mapped_column(
+        String(512), nullable=True
+    )
+
+    # Relationships
+    snapshot: Mapped["Snapshot"] = relationship(
+        back_populates="slash_command_snapshots"
+    )
+    content: Mapped[Optional["FileContent"]] = relationship(
+        back_populates="command_refs"
+    )
+
+    def __repr__(self) -> str:
+        return f"<SlashCommandSnapshot(command={self.command_name}, snapshot={self.snapshot_id})>"
+
+
+class ClaudeMemorySnapshot(Base):
+    """
+    CLAUDE.md memory file at a specific snapshot time.
+    Content is deduplicated via FileContent reference.
+    """
+
+    __tablename__ = "claude_memory_snapshots"
+    __table_args__ = (Index("idx_snapshot_memory", "snapshot_id", "scope"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    snapshot_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("snapshots.id", ondelete="CASCADE"), nullable=False
+    )
+    scope: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # "user" or "project"
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("file_contents.id"), nullable=True
+    )
+    config_file_path: Mapped[Optional[str]] = mapped_column(
+        String(512), nullable=True
+    )
+
+    # Relationships
+    snapshot: Mapped["Snapshot"] = relationship(
+        back_populates="claude_memory_snapshots"
+    )
+    content: Mapped[Optional["FileContent"]] = relationship(
+        back_populates="memory_refs"
+    )
+
+    def __repr__(self) -> str:
+        return f"<ClaudeMemorySnapshot(scope={self.scope}, snapshot={self.snapshot_id})>"
 
 
 class SnapshotChange(Base):
