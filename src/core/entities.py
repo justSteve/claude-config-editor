@@ -8,7 +8,7 @@ database models.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -31,7 +31,7 @@ class McpServerEntity:
     enabled: bool = True
     config_file: Optional[str] = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert entity to dictionary for serialization."""
         return {
             "name": self.name,
@@ -56,10 +56,10 @@ class SubagentEntity:
     """
     name: str
     content: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
     config_file: Optional[str] = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert entity to dictionary for serialization."""
         return {
             "name": self.name,
@@ -82,10 +82,10 @@ class SlashCommandEntity:
     """
     name: str
     content: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
     config_file: Optional[str] = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert entity to dictionary for serialization."""
         return {
             "name": self.name,
@@ -109,7 +109,7 @@ class ClaudeMemoryEntity:
     content: str
     path: str
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert entity to dictionary for serialization."""
         return {
             "scope": self.scope,
@@ -141,7 +141,7 @@ class EntitySnapshot:
     slash_commands: list[SlashCommandEntity] = field(default_factory=list)
     memory: Optional[ClaudeMemoryEntity] = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert entity snapshot to dictionary for serialization."""
         return {
             "snapshot_id": self.snapshot_id,
@@ -152,7 +152,7 @@ class EntitySnapshot:
             "memory": self.memory.to_dict() if self.memory else None,
         }
 
-    def summary(self) -> dict:
+    def summary(self) -> dict[str, Any]:
         """
         Generate a summary of the entity snapshot.
 

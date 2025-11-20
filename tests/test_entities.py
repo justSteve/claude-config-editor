@@ -5,7 +5,7 @@ Validates entity creation, serialization, and snapshot summaries.
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.core.entities import (
     McpServerEntity,
@@ -241,13 +241,13 @@ class TestEntitySnapshot:
         subagent = SubagentEntity(
             name="code-reviewer",
             content="You are a reviewer...",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
 
         command = SlashCommandEntity(
             name="/review",
             content="Review code...",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
 
         memory = ClaudeMemoryEntity(
@@ -297,10 +297,10 @@ class TestEntitySnapshot:
         mcp2 = McpServerEntity(name="server2", command="cmd2")
         mcp3 = McpServerEntity(name="server3", command="cmd3")
 
-        subagent1 = SubagentEntity(name="sub1", content="c1", created_at=datetime.utcnow())
-        subagent2 = SubagentEntity(name="sub2", content="c2", created_at=datetime.utcnow())
+        subagent1 = SubagentEntity(name="sub1", content="c1", created_at=datetime.now(timezone.utc))
+        subagent2 = SubagentEntity(name="sub2", content="c2", created_at=datetime.now(timezone.utc))
 
-        command1 = SlashCommandEntity(name="/cmd1", content="c1", created_at=datetime.utcnow())
+        command1 = SlashCommandEntity(name="/cmd1", content="c1", created_at=datetime.now(timezone.utc))
 
         memory = ClaudeMemoryEntity(scope="user", content="memory", path="/path")
 
@@ -400,8 +400,8 @@ class TestEntitySnapshot:
 
     def test_entity_snapshot_mutable_defaults(self):
         """Test that entity lists don't share references."""
-        snapshot1 = EntitySnapshot(snapshot_id=1, snapshot_time=datetime.utcnow())
-        snapshot2 = EntitySnapshot(snapshot_id=2, snapshot_time=datetime.utcnow())
+        snapshot1 = EntitySnapshot(snapshot_id=1, snapshot_time=datetime.now(timezone.utc))
+        snapshot2 = EntitySnapshot(snapshot_id=2, snapshot_time=datetime.now(timezone.utc))
 
         mcp = McpServerEntity(name="test", command="cmd")
         snapshot1.mcp_servers.append(mcp)
