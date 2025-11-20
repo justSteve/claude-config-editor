@@ -55,3 +55,6 @@ test_*.json
 .coverage
 htmlcov/
 nul
+
+# Git worktrees
+.worktrees/
