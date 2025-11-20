@@ -11,9 +11,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git=1:2.39.2-1.1 \
-    sqlite3=3.40.1-2 \
-    curl=7.88.1-10+deb12u8 \
+    git \
+    sqlite3 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for development
